@@ -1,0 +1,21 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  host: <%= ENV.fetch('DATABASE_HOST', 'db') %>
+  username: <%= ENV.fetch('DATABASE_USERNAME', 'postgres') %>
+  password: <%= ENV.fetch('DATABASE_PASSWORD', 'password') %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: pi_cinco_web_development
+
+test:
+  <<: *default
+  database: pi_cinco_web_test
+
+production:
+  <<: *default
+  database: pi_cinco_web_production
+  username: pi_cinco_web
+  password: <%= ENV["PI_CINCO_WEB_DATABASE_PASSWORD"] %>
