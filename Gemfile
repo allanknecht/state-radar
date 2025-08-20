@@ -70,4 +70,4 @@ gem "nokogiri"
 gem "capybara"
 gem "selenium-webdriver"
 
-gem "faraday"
+gem "faraday-retry", "~> 2.2"
