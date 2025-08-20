@@ -1,0 +1,33 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  site: MyString
+  categoria: MyString
+  codigo: MyString
+  titulo: MyString
+  localizacao: MyString
+  link: MyString
+  imagem: MyString
+  preco_brl: 9.99
+  dormitorios: 1
+  suites: 1
+  vagas: 1
+  area_m2: 9.99
+  condominio: 9.99
+  iptu: 9.99
+
+two:
+  site: MyString
+  categoria: MyString
+  codigo: MyString
+  titulo: MyString
+  localizacao: MyString
+  link: MyString
+  imagem: MyString
+  preco_brl: 9.99
+  dormitorios: 1
+  suites: 1
+  vagas: 1
+  area_m2: 9.99
+  condominio: 9.99
+  iptu: 9.99
