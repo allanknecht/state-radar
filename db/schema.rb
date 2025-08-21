@@ -10,26 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_20_222807) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_21_004321) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "scrapper_records", force: :cascade do |t|
-    t.string "site"
+    t.string "site", null: false
     t.string "categoria"
-    t.string "codigo"
+    t.string "codigo", null: false
     t.string "titulo"
     t.string "localizacao"
     t.string "link"
     t.string "imagem"
-    t.decimal "preco_brl"
+    t.decimal "preco_brl", precision: 12, scale: 2
     t.integer "dormitorios"
     t.integer "suites"
     t.integer "vagas"
-    t.decimal "area_m2"
-    t.decimal "condominio"
-    t.decimal "iptu"
+    t.decimal "area_m2", precision: 10, scale: 2
+    t.decimal "condominio", precision: 12, scale: 2
+    t.decimal "iptu", precision: 12, scale: 2
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["categoria"], name: "index_scrapper_records_on_categoria"
+    t.index ["localizacao"], name: "index_scrapper_records_on_localizacao"
+    t.index ["preco_brl"], name: "index_scrapper_records_on_preco_brl"
+    t.index ["site", "codigo"], name: "index_scrapper_records_on_site_and_codigo", unique: true
   end
 end

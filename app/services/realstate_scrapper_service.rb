@@ -31,14 +31,16 @@ class RealstateScrapperService
 
   # Ex.: scrape_category(:locacao, max_pages: 50)
   # Se passar um bloco, faz yield por imóvel; caso contrário, retorna array
-  def scrape_category(categoria, max_pages: 50)
+  def scrape_category(categoria, max_pages: nil)
     path = PATHS.fetch(categoria) { raise ArgumentError, "categoria inválida: #{categoria}" }
 
     results = []
-    (1..max_pages).each do |page|
+    page = 1
+    loop do
+      break if max_pages && page > max_pages  # só limita se max_pages foi passado
+
       url = "#{path}?&pagina=#{page}"
       doc = get_doc(url)
-
       items = parse_list(doc, categoria)
       break if items.empty?
 
@@ -48,7 +50,8 @@ class RealstateScrapperService
         results.concat(items)
       end
 
-      sleep(@pause) # ser gentil com o servidor
+      page += 1
+      sleep(@pause)
     end
 
     results
