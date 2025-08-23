@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :scrapper_records, only: %i[index show]
+  resources :scraper_records, only: %i[index show]
   devise_for :users
   namespace :api do
     get "health/index"

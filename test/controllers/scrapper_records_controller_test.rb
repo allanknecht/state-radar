@@ -1,13 +1,13 @@
 require "test_helper"
 
-class ScrapperRecordsControllerTest < ActionDispatch::IntegrationTest
+class scraperRecordsControllerTest < ActionDispatch::IntegrationTest
   test "should get index" do
-    get scrapper_records_index_url
+    get scraper_records_index_url
     assert_response :success
   end
 
   test "should get show" do
-    get scrapper_records_show_url
+    get scraper_records_show_url
     assert_response :success
   end
 end

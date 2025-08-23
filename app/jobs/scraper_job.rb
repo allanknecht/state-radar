@@ -1,10 +1,16 @@
-class ScrapperJob < ApplicationJob
+class ScraperJob < ApplicationJob
   queue_as :default
 
   def perform
-    scrapper = RealstateScrapperService.new
-    %i[locacao venda].each do |cat|
-      scrapper.scrape_category(cat) { |registry| upsert_record!(registry) }
+    scrapers = [
+      SimaoScraperService.new,
+    # OutroSiteScraperService.new,
+    ]
+
+    scrapers.each do |scraper|
+      %i[locacao venda].each do |cat|
+        scraper.scrape_category(cat) { |registry| upsert_record!(registry) }
+      end
     end
   end
 
@@ -13,7 +19,7 @@ class ScrapperJob < ApplicationJob
   def upsert_record!(r)
     code = r[:codigo].presence || Digest::SHA1.hexdigest(r[:link].to_s)[0, 16]
 
-    rec = ScrapperRecord.find_or_initialize_by(site: r[:site], codigo: code)
+    rec = ScraperRecord.find_or_initialize_by(site: r[:site], codigo: code)
     rec.assign_attributes(
       categoria: r[:categoria],
       titulo: r[:titulo],

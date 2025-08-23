@@ -1,4 +1,4 @@
-# Scrapper de Imóveis
+# Scraper de Imóveis
 
 ## Integrantes da Equipe
 - Allan Knecht

@@ -1,8 +1,7 @@
-# app/controllers/scraper_records_controller.rb
-class ScrapperRecordsController < ApplicationController
+class ScraperRecordsController < ApplicationController
   # GET /scraper_records
   def index
-    scope = ScrapperRecord.all
+    scope = ScraperRecord.all
 
     scope = scope.where(categoria: params[:category]) if params[:category].present?
     scope = scope.where("preco_brl >= ?", params[:min_price]) if params[:min_price].present?
@@ -33,7 +32,7 @@ class ScrapperRecordsController < ApplicationController
 
   # GET /scraper_records/:id
   def show
-    record = ScrapperRecord.find(params[:id])
+    record = ScraperRecord.find(params[:id])
     render json: record.as_json
   end
 end
