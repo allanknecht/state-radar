@@ -60,8 +60,20 @@ class BaseScraperService
   end
 
   def parse_decimal(num_str)
-    return nil if num_str.nil? || num_str.empty?
-    s = num_str.tr(".", "").tr(",", ".")
+    return nil if num_str.nil?
+    s = num_str.to_s.strip
+    s = s.gsub(/[^\d\.,]/, "")  # mantém só dígitos, ponto e vírgula
+
+    if s.include?(",") && s.include?(".")
+      # Ex.: "1.234,56" -> "1234.56"
+      s = s.delete(".").sub(",", ".")
+    elsif s.include?(",")
+      # Ex.: "161,55" -> "161.55"
+      s = s.sub(",", ".")
+    else
+      # Ex.: "161.55" (já ok)
+    end
+
     Float(s)
   rescue
     nil
