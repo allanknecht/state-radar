@@ -24,9 +24,9 @@ class BaseScraperService
 
   private
 
-  # ----------------------
+  #
   # Utilitários compartilhados
-  # ----------------------
+  #
 
   def get_doc(relative_or_absolute_url)
     # aceita URL relativa ("/path") OU absoluta ("https://...")
@@ -81,5 +81,22 @@ class BaseScraperService
 
   def polite_sleep
     sleep(@pause + rand * 0.4)
+  end
+
+  def normalize_vagas_range(texto)
+    return [nil, nil] if texto.nil? || texto.empty?
+
+    # Procura por padrões como "2-3", "1 a 2", "2 ou 3"
+    case texto.to_s
+    when /(\d+)\s*[-a]\s*(\d+)/
+      [$1.to_i, $2.to_i]
+    when /(\d+)\s+ou\s+(\d+)/
+      [$1.to_i, $2.to_i]
+    when /(\d+)/
+      num = $1.to_i
+      [num, num]
+    else
+      [nil, nil]
+    end
   end
 end
