@@ -1,8 +1,8 @@
-# app/services/simao_scraper_service.rb
+# app/services/mws_scraper_service.rb
 require "nokogiri"
 
-class SimaoScraperService < BaseScraperService
-  BASE_URL = "https://www.simaoimoveis.com.br/".freeze
+class MwsScraperService < BaseScraperService
+  BASE_URL = "https://mws-rs.com.br/".freeze
 
   PATHS = {
     venda: "imoveis-para-venda.php",
@@ -22,7 +22,7 @@ class SimaoScraperService < BaseScraperService
     loop do
       break if max_pages && page > max_pages
 
-      url = "#{path}?&pagina=#{page}"
+      url = "#{path}?pagina=#{page}"
       doc = get_doc(url)
       items = parse_list(doc, categoria)
       break if items.empty?
@@ -30,11 +30,11 @@ class SimaoScraperService < BaseScraperService
       items.each do |base|
         if fetch_details && base[:link].present?
           begin
-            details = PropertyDetailsExtractor.new(self).extract(base[:link])
+            details = MwsPropertyDetailsExtractor.new(self).extract(base[:link])
             base.merge!(details)
             polite_sleep
           rescue => e
-            warn "[Simao] detalhes falharam em #{base[:link]}: #{e.class} - #{e.message}"
+            warn "[MWS] detalhes falharam em #{base[:link]}: #{e.class} - #{e.message}"
           end
         end
 
@@ -60,15 +60,15 @@ class SimaoScraperService < BaseScraperService
   end
 
   def parse_item(node, categoria_hint)
-    basic_info = CardParser.new(node, categoria_hint, self).parse
+    basic_info = MwsCardParser.new(node, categoria_hint, self).parse
     return nil if basic_info[:titulo].nil? && basic_info[:link].nil?
 
-    basic_info.merge(site: "simaoimoveis")
+    basic_info.merge(site: "mws-rs")
   end
 end
 
 # Classe responsável por extrair informações dos cards
-class CardParser
+class MwsCardParser
   def initialize(node, categoria_hint, scraper)
     @node = node
     @categoria_hint = categoria_hint
@@ -77,13 +77,12 @@ class CardParser
 
   def parse
     loc = extract_location
-
     {
       categoria: extract_category,
       codigo: extract_code,
       titulo: extract_title,
       localizacao: loc,
-      cidade: extract_city_from_location(loc),  # <- AQUI
+      cidade: extract_city_from_location(loc),   # <- AQUI
       link: extract_link,
       imagem: extract_image,
       preco_brl: extract_price,
@@ -97,9 +96,6 @@ class CardParser
     text = @scraper.send(:squish, loc).to_s
     return nil if text.empty?
 
-    # Casos típicos observados:
-    # "Cerâmica , ERECHIM"  => último token é a cidade
-    # "Taquara"             => a string toda é a cidade
     candidate = if text.include?(",")
         text.split(",").last
       else
@@ -111,20 +107,19 @@ class CardParser
 
   def normalize_city(str)
     c = @scraper.send(:squish, str).to_s
-    # remove sufixos de UF e parenteses finais comuns
-    c = c.gsub(/\/[A-Z]{2}\z/i, "") # "/RS"
-         .gsub(/\s*-\s*[A-Z]{2}\z/i, "") # "- RS"
-         .gsub(/\s*\([^)]*\)\z/, "") # "(...)" no fim
-         .strip
+    c = c.gsub(/\/[A-Z]{2}\z/i, "") # remove "/RS"
+      .gsub(/\s*-\s*[A-Z]{2}\z/i, "") # remove "- RS"
+      .gsub(/\s*\([^)]*\)\z/, "") # remove "(...)" no fim
+      .strip
     c.presence
   end
 
   def extract_category
     badge = @scraper.send(:squish, @node.at_css(".product-badge li")&.text)
 
-    if badge&.match?(/loca[cç][aã]o/i)
+    if badge&.match?(/loca[cç][ãa]o/i)
       "Locação"
-    elsif badge&.match?(/venda/i)
+    elsif badge&.match?(/vendas?/i) # <- parênteses corretos e sem ) extra
       "Venda"
     else
       @categoria_hint == :locacao ? "Locação" : (@categoria_hint == :venda ? "Venda" : nil)
@@ -133,7 +128,7 @@ class CardParser
 
   def extract_code
     badge = @scraper.send(:squish, @node.at_css(".product-badge li")&.text)
-    badge&.match(/c[oó]d\.\s*im[oó]vel\s*(\d+)/i)&.captures&.first
+    badge&.match(/cód\.\s*im[óo]vel\s*(\d+)/i)&.captures&.first
   end
 
   def extract_title
@@ -145,12 +140,14 @@ class CardParser
   end
 
   def extract_link
-    href = @node.at_css(".product-img a")&.[]("href")
+    href = @node.at_css(".product-title a, .product-img a")&.[]("href")
     href ? @scraper.send(:absolutize, href) : nil
   end
 
   def extract_image
-    @node.at_css(".product-img img")&.[]("src")
+    img = @node.at_css(".product-img img")
+    src = img&.[]("src") || img&.[]("data-src")
+    src
   end
 
   def extract_price
@@ -159,26 +156,35 @@ class CardParser
   end
 
   def extract_card_details
-    details = { dormitorios: nil, suites: nil, vagas: nil, area_m2: nil, condominio: nil, iptu: nil }
+    # CORRIGIDO: sintaxe do hash
+    details = {
+      dormitorios: nil,
+      suites: nil,
+      vagas: nil,
+      area_m2: nil,
+      banheiros: nil,
+    }
 
-    @node.css("ul.ltn__list-item-2--- li").each do |li|
+    # CORRIGIDO: sintaxe do each
+    @node.css(".ltn__plot-brief li").each do |li|
       text = @scraper.send(:squish, li.text)
+      span_text = @scraper.send(:squish, li.at_css("span")&.text)
 
-      case text
-      when /\b(\d+)\s*Dormit[oó]rios?/i
-        details[:dormitorios] = $1.to_i
-      when /\b(\d+)\s*Suites?/i
-        details[:suites] = $1.to_i
-      when /\b(\d+)\s*Vagas?/i
-        details[:vagas] = $1.to_i
-      when /([\d\.\,]+)\s*m²/i
-        details[:area_m2] = @scraper.send(:parse_decimal, $1)
-      when /condom[ií]nio/i
-        value_text = li.at_css("span")&.text || text
-        details[:condominio] = @scraper.send(:parse_brl, value_text)
-      when /\biptu\b/i
-        value_text = li.at_css("span")&.text || text
-        details[:iptu] = @scraper.send(:parse_brl, value_text)
+      # Extrai informações baseado no texto do span e descrição
+      case text.downcase
+      when /quartos/i
+        details[:dormitorios] = span_text.to_i if span_text&.match?(/\d+/)
+      when /suites?/i
+        details[:suites] = span_text.to_i if span_text&.match?(/\d+/)
+      when /vagas/i
+        details[:vagas] = span_text.to_i if span_text&.match?(/\d+/)
+      when /banheiros/i
+        details[:banheiros] = span_text.to_i if span_text&.match?(/\d+/)
+      when /área\s+(privativa|total)/i
+        area_match = span_text&.match(/([\d\.\,]+)m²?/i)
+        if area_match
+          details[:area_m2] = @scraper.send(:parse_decimal, area_match[1])
+        end
       end
     end
 
@@ -187,7 +193,7 @@ class CardParser
 end
 
 # Classe responsável por extrair detalhes da página individual
-class PropertyDetailsExtractor
+class MwsPropertyDetailsExtractor
   def initialize(scraper)
     @scraper = scraper
   end
@@ -210,12 +216,24 @@ class PropertyDetailsExtractor
 
   private
 
+  def extract_basic_info(doc)
+    loc_detail = extract_location_from_detail(doc)
+    {
+      titulo: squish(doc.at_css("h1")&.text),
+      categoria: extract_category_from_meta(doc),
+      codigo: extract_code_from_meta(doc),
+      localizacao: loc_detail,
+      cidade: extract_city_from_detail(doc, loc_detail), # <- AQUI
+      preco_brl: extract_price_from_detail(doc),
+    }
+  end
+
   def extract_city_from_detail(doc, loc_text)
-    # 1) tentar pela label sob h1 (ex.: "... - BAIRRO - ERECHIM/RS")
+    # 1) Tenta pela label sob o h1 (ex.: "... - ERECHIM/RS")
     city = city_from_location_string(loc_text)
     return city if city
 
-    # 2) fallback via h1 com "em CIDADE"
+    # 2) Tenta pelo h1 contendo "em CIDADE"
     h1 = squish(doc.at_css("h1")&.text).to_s
     if (m = h1.match(/\bem\s+([A-ZÁÂÃÀÉÊÍÓÔÕÚÇ][A-Za-zÁÂÃÀÉÊÍÓÔÕÚÇ\s\-]+)\b/i))
       return normalize_city(m[1])
@@ -228,12 +246,12 @@ class PropertyDetailsExtractor
     t = squish(text).to_s
     return nil if t.empty?
 
-    # Padrão comum: "- CIDADE/UF" no final
+    # Padrão Solar/MWS comum: "... - BAIRRO - CIDADE/UF"
     if (m = t.match(/-\s*([^-\n\/]+)(?:\/[A-Z]{2})?\s*\z/))
       return normalize_city(m[1])
     end
 
-    # Fallback: último token após vírgula
+    # fallback: último token após vírgula
     if t.include?(",")
       return normalize_city(t.split(",").last)
     end
@@ -243,28 +261,13 @@ class PropertyDetailsExtractor
 
   def normalize_city(str)
     s = squish(str).to_s
-    s = s.gsub(/\/[A-Z]{2}\z/i, "") # "/RS"
-         .gsub(/\s*-\s*[A-Z]{2}\z/i, "") # "- RS"
-         .strip
+    s = s.gsub(/\/[A-Z]{2}\z/i, "").gsub(/\s*-\s*[A-Z]{2}\z/i, "").strip
     s.presence
   end
 
-  def extract_basic_info(doc)
-    loc_detail = extract_location_from_detail(doc)
-
-    {
-      titulo: squish(doc.at_css("h1")&.text),
-      categoria: extract_category_from_meta(doc),
-      codigo: extract_code_from_meta(doc),
-      localizacao: loc_detail,
-      cidade: extract_city_from_detail(doc, loc_detail),  # <- AQUI
-      preco_brl: extract_price_from_detail(doc),
-    }
-  end
-
   def extract_category_from_meta(doc)
-    # Try from meta first
-    categoria = doc.css(".ltn__blog-meta .ltn__blog-category a")
+    # Tenta extrair categoria dos meta dados
+    categoria = doc.css(".ltn__blog-category a")
                    .map { |a| squish(a.text) }
                    .find { |t| t =~ /venda|loca/i }
 
@@ -272,8 +275,8 @@ class PropertyDetailsExtractor
     when /venda/ then "Venda"
     when /loca/ then "Locação"
     else
-      # Fallback: try from widget title
-      widget_title = doc.at_css(".widget h4.ltn__widget-title")&.text
+      # Fallback: tenta do widget title
+      widget_title = doc.at_css(".ltn__widget-title")&.text
       case widget_title&.downcase
       when /venda/ then "Venda"
       when /loca/ then "Locação"
@@ -282,32 +285,37 @@ class PropertyDetailsExtractor
   end
 
   def extract_code_from_meta(doc)
-    # Try from meta first
-    code_text = doc.css(".ltn__blog-meta .ltn__blog-category a")
+    # Tenta extrair código dos meta dados
+    code_text = doc.css(".ltn__blog-category a")
                    .map { |a| squish(a.text) }
-                   .find { |t| t =~ /c[oó]d\s*:/i }
+                   .find { |t| t =~ /cód/i }
     code_text&.match(/(\d+)/)&.captures&.first
   end
 
   def extract_location_from_detail(doc)
-    # Extract from the label under h1
+    # Extrai localização do label sob o h1
     location_text = squish(doc.at_css("h1 ~ label")&.text)
-    return location_text if location_text
 
-    # Fallback: extract just the address part if it includes full address
-    if location_text&.include?(" - ")
-      parts = location_text.split(" - ")
-      # Return neighborhood and city if available
-      parts.length > 1 ? "#{parts[-2]} - #{parts[-1]}" : location_text
+    if location_text && location_text.include?("Rua")
+      # Remove ícone e mantém endereço completo
+      location_text.gsub(/.*?Rua/, "Rua").strip
     else
       location_text
     end
   end
 
   def extract_price_from_detail(doc)
-    # Try multiple approaches to find price
+    # Múltiplas estratégias para encontrar o preço
 
-    # First approach: look for "Valor do Aluguel" or similar
+    # 1. Procura no widget do valor do imóvel
+    price_widget = doc.css("h4").find { |n| n.text =~ /valor do im[óo]vel/i }
+    if price_widget
+      price_text = squish(price_widget.text)
+      price = parse_brl(price_text)
+      return price if price
+    end
+
+    # 2. Procura na lista de características
     doc.css(".property-detail-feature-list-item").each do |item|
       h6_text = squish(item.at_css("h6")&.text)
       if h6_text =~ /valor\s+(do\s+)?(aluguel|venda|im[óo]vel)/i
@@ -317,13 +325,6 @@ class PropertyDetailsExtractor
       end
     end
 
-    # Second approach: look for h4 with price info
-    h4 = doc.css("h4").find { |n| n.text =~ /valor do im[óo]vel/i }
-    if h4
-      text = squish(h4.text)
-      return parse_brl(text) || parse_brl(text&.sub(/.*valor do im[óo]vel:\s*/i, ""))
-    end
-
     nil
   end
 
@@ -331,12 +332,13 @@ class PropertyDetailsExtractor
     details = extract_details_hash(doc)
 
     {
-      dormitorios: extract_int(details, "Dormitórios", "Dormitorios", "Quartos"),
-      suites: extract_int(details, "Suítes", "Suites"),
+      dormitorios: extract_int(details, "Quartos", "Dormitórios"),
+      suites: extract_int(details, "Suítes"),
       banheiros: extract_int(details, "Banheiros"),
       lavabos: extract_lavabo_count(details, doc),
       **extract_vagas_info(details),
       mobiliacao: extract_mobiliacao(details, doc),
+      tipo_imovel: extract_property_type(details),
     }
   end
 
@@ -357,39 +359,43 @@ class PropertyDetailsExtractor
   end
 
   def extract_lavabo_count(details, doc)
-    # First try from details hash
+    # Primeiro tenta da hash de detalhes
     lavabo_count = extract_int(details, "Lavabo", "Lavabos")
     return lavabo_count if lavabo_count
 
-    # Then check amenities for "Lavabo" presence
+    # Depois verifica nas amenidades
     amenities_text = extract_all_amenities_text(doc)
     if amenities_text.any? { |text| text =~ /lavabo/i }
-      return 1  # Assume 1 if mentioned in amenities
+      return 1
     end
 
     nil
   end
 
   def extract_vagas_info(details)
-    vagas_text = extract_first_value(details, "Garagens", "Vagas")
-    vagas = extract_int(details, "Garagens", "Vagas")
+    vagas_text = extract_first_value(details, "Vagas", "Garagens")
+    vagas = extract_int(details, "Vagas", "Garagens")
     vagas_min, vagas_max = normalize_vagas_range(vagas_text)
 
     { vagas: vagas, vagas_min: vagas_min, vagas_max: vagas_max }
   end
 
+  def extract_property_type(details)
+    details["Tipo do imóvel"] || details["Tipo de imóvel"]
+  end
+
   def extract_mobiliacao(details, doc)
-    # Check details first
+    # Verifica nos detalhes primeiro
     values_to_check = details.values + [squish(doc.at_css("h1")&.text)]
 
-    # Check description content
+    # Adiciona descrição
     description_text = extract_description(doc)
     values_to_check << description_text if description_text
 
     raw = values_to_check.compact.find { |v| v =~ /mobiliad/i }
     return raw&.downcase if raw
 
-    # Check amenities for furniture-related items
+    # Verifica nas amenidades
     amenities_text = extract_all_amenities_text(doc)
     furniture_amenities = amenities_text.select { |text|
       text =~ /(mobiliad|mobili[aá]do|sem\s+mobil|mobil[ií]a)/i
@@ -402,18 +408,17 @@ class PropertyDetailsExtractor
   def extract_areas(doc)
     areas = {}
 
-    # ache o h4 certo
+    # Procura seção de áreas
     anchor = doc.css("h4.title-2").find { |n| n.text =~ /[ÁáAa]reas do im[óo]vel/i }
     return { area_m2: nil, area_privativa_m2: nil } unless anchor
 
-    # pegue o primeiro irmão que seja elemento e tenha a classe correta
+    # Encontra container de áreas
     container = anchor.next_element
     while container && !container["class"].to_s.include?("property-detail-feature-list")
-      # se chegou em outro h4, para (acabou a seção)
       break if container.name =~ /^h[1-6]$/
       container = container.next_element
     end
-    return { area_m2: nil, area_privativa_m2: nil } unless container && container["class"].to_s.include?("property-detail-feature-list")
+    return { area_m2: nil, area_privativa_m2: nil } unless container
 
     container.css(".property-detail-feature-list-item").each do |block|
       label = squish(block.at_css("h6")&.text).to_s.downcase
@@ -430,30 +435,51 @@ class PropertyDetailsExtractor
         areas[:area_construida_m2] = num
       when label.include?("total")
         areas[:area_total_m2] = num
-      when label.include?("comum")
-        areas[:area_comum_m2] = (areas[:area_comum_m2] || 0) + num
+      when label.include?("terreno")
+        areas[:area_terreno_m2] = num
       end
     end
 
     {
       area_m2: areas[:area_privativa_m2] || areas[:area_construida_m2] || areas[:area_total_m2],
       area_privativa_m2: areas[:area_privativa_m2],
-      area_privativa_comum_m2: areas[:area_comum_m2],
+      area_total_m2: areas[:area_total_m2],
+      area_terreno_m2: areas[:area_terreno_m2],
     }
   end
 
   def extract_description(doc)
-    anchor = doc.css("h4.title-2").find { |n| n.text =~ /descri[cç][aã]o do im[óo]vel/i }
-    return nil unless anchor
+    # Procura seção de descrição
+    desc_section = doc.css("h4.title-2").find { |h4| h4.text =~ /descri[cç][ãa]o do im[óo]vel/i }
+    return nil unless desc_section
 
-    DescriptionExtractor.new.extract_from_anchor(anchor)
+    # Pega próximos elementos até encontrar outro h4
+    content_parts = []
+    sibling = desc_section.next_element
+
+    while sibling
+      break if sibling.name =~ /^h[1-6]$/ || sibling["class"].to_s.include?("title-2")
+
+      case sibling.name
+      when "p"
+        text = squish(sibling.text)
+        content_parts << text unless text.empty?
+      when "ul"
+        list_items = sibling.css("li").map { |li| "• #{squish(li.text)}" }
+        content_parts << list_items.join("\n") unless list_items.empty?
+      end
+
+      sibling = sibling.next_element
+    end
+
+    content_parts.reject(&:empty?).join("\n\n").presence
   end
 
   def extract_amenities(doc)
     amenities = []
 
-    # Extract from multiple sections
-    ["Características do Imóvel", "Características do Condomínio", "Próximidades"].each do |section_name|
+    # Extrai de múltiplas seções
+    ["Características do Imóvel", "Infraestrutura do Condomínio"].each do |section_name|
       section_amenities = extract_amenities_from_section(doc, section_name)
       amenities.concat(section_amenities)
     end
@@ -468,16 +494,22 @@ class PropertyDetailsExtractor
       title = squish(h4.text)
       next unless title =~ /#{Regexp.escape(section_title)}/i
 
-      # Look for the amenities container after this h4
-      container = h4.xpath("following-sibling::*")
-                    .find { |n| n["class"].to_s.include?("property-details-amenities") }
-      next unless container
+      # Procura lista de amenidades depois do h4
+      sibling = h4.next_element
+      while sibling
+        break if sibling.name =~ /^h[1-6]$/
 
-      container.css("label.checkbox-item").each do |label|
-        text = squish(label.text)
-        # Remove any input-related text
-        clean_text = text.gsub(/input.*$/i, "").strip
-        amenities << clean_text unless clean_text.empty?
+        if sibling.css(".ltn__menu-widget ul li").any?
+          sibling.css(".ltn__menu-widget ul li").each do |li|
+            text = squish(li.text)
+            # Remove ícones e texto extra
+            clean_text = text.gsub(/^\s*\u2713\s*/, "").gsub(/\s*<br>\s*$/, "").strip
+            amenities << clean_text unless clean_text.empty?
+          end
+          break
+        end
+
+        sibling = sibling.next_element
       end
     end
 
@@ -486,9 +518,9 @@ class PropertyDetailsExtractor
 
   def extract_all_amenities_text(doc)
     amenities_text = []
-    doc.css(".property-details-amenities label.checkbox-item").each do |label|
-      text = squish(label.text)
-      clean_text = text.gsub(/input.*$/i, "").strip
+    doc.css(".ltn__menu-widget ul li").each do |li|
+      text = squish(li.text)
+      clean_text = text.gsub(/^\s*\u2713\s*/, "").gsub(/\s*<br>\s*$/, "").strip
       amenities_text << clean_text unless clean_text.empty?
     end
     amenities_text
@@ -500,51 +532,4 @@ class PropertyDetailsExtractor
   def parse_decimal(str); @scraper.send(:parse_decimal, str); end
   def extract_first_value(hash, *keys); keys.map { |k| hash[k] }.compact.first; end
   def normalize_vagas_range(texto); @scraper.send(:normalize_vagas_range, texto); end
-end
-
-# Classe especializada em extrair descrições
-class DescriptionExtractor
-  def extract_from_anchor(anchor)
-    content_parts = []
-    sibling = anchor.next_element   # <- aqui
-
-    while sibling
-      break if sibling.name =~ /^h[1-6]$/ || sibling["class"].to_s.include?("title-2")
-      case sibling.name
-      when "p"
-        text = squish(sibling.text)
-        content_parts << text unless text.empty?
-      when "ul"
-        list_content = extract_list_content(sibling)
-        content_parts << list_content unless list_content.empty?
-      end
-      sibling = sibling.next_element  # <- e aqui
-    end
-
-    content_parts.reject(&:empty?).join("\n\n").presence
-  end
-
-  private
-
-  def extract_list_content(ul_element)
-    list_items = ul_element.css("li").map do |li|
-      item_text = squish(li.text)
-      next if item_text.empty?
-
-      if li.css("ul").any?
-        main_text = squish(li.children.select(&:text?).map(&:text).join(" "))
-        sub_items = li.css("ul li").map { |sub_li| "  - #{squish(sub_li.text)}" }.join("\n")
-        "• #{main_text}\n#{sub_items}"
-      else
-        "• #{item_text}"
-      end
-    end.compact
-
-    list_items.join("\n")
-  end
-
-  def squish(str)
-    return nil if str.nil?
-    str.gsub(/\s+/, " ").strip
-  end
 end
