@@ -22,14 +22,82 @@ class BaseScraperService
     end
   end
 
+  def scrape_category(categoria, max_pages: nil, fetch_details: true)
+    path = self.class::PATHS.fetch(categoria) { raise ArgumentError, "categoria inválida: #{categoria}" }
+
+    results = []
+    page = 1
+
+    loop do
+      break if max_pages && page > max_pages
+
+      url = build_page_url(path, page)
+      doc = get_doc(url)
+      items = parse_list(doc, categoria)
+      break if items.empty?
+
+      items.each do |base|
+        if fetch_details && base[:link].present?
+          begin
+            details = property_details_extractor.extract(base[:link])
+            base.merge!(details)
+            polite_sleep
+          rescue => e
+            warn "[#{site_name}] detalhes falharam em #{base[:link]}: #{e.class} - #{e.message}"
+          end
+        end
+
+        block_given? ? yield(base) : results << base
+      end
+
+      page += 1
+      polite_sleep
+    end
+
+    results
+  end
+
+  def get_document(url)
+    get_doc(url)
+  end
+
+  protected
+
+  # Template methods to be overridden by subclasses
+  def site_name
+    self.class.name.gsub(/ScraperService$/, "")
+  end
+
+  def build_page_url(path, page)
+    "#{path}?pagina=#{page}"
+  end
+
+  def card_parser_class
+    "#{self.class.name}CardParser".constantize
+  end
+
+  def property_details_extractor
+    "#{self.class.name}PropertyDetailsExtractor".constantize.new(self)
+  end
+
   private
 
-  #
-  # Utilitários compartilhados
-  #
+  def parse_list(doc, categoria)
+    doc.css(".ltn__product-item").map { |item| parse_item(item, categoria) }.compact
+  end
+
+  def parse_item(node, categoria_hint)
+    basic_info = card_parser_class.new(node, categoria_hint, self).parse
+    return nil if basic_info[:titulo].nil? && basic_info[:link].nil?
+
+    basic_info.merge(site: site_identifier)
+  end
+
+  def site_identifier
+    self.class.name.underscore.gsub(/_scraper_service$/, "")
+  end
 
   def get_doc(relative_or_absolute_url)
-    # aceita URL relativa ("/path") OU absoluta ("https://...")
     url = relative_or_absolute_url.to_s
     if url.start_with?("http://", "https://")
       res = @conn.get(url, nil, DEFAULT_HEADERS)
@@ -62,16 +130,12 @@ class BaseScraperService
   def parse_decimal(num_str)
     return nil if num_str.nil?
     s = num_str.to_s.strip
-    s = s.gsub(/[^\d\.,]/, "")  # mantém só dígitos, ponto e vírgula
+    s = s.gsub(/[^\d\.,]/, "")
 
     if s.include?(",") && s.include?(".")
-      # Ex.: "1.234,56" -> "1234.56"
       s = s.delete(".").sub(",", ".")
     elsif s.include?(",")
-      # Ex.: "161,55" -> "161.55"
       s = s.sub(",", ".")
-    else
-      # Ex.: "161.55" (já ok)
     end
 
     Float(s)
@@ -86,7 +150,6 @@ class BaseScraperService
   def normalize_vagas_range(texto)
     return [nil, nil] if texto.nil? || texto.empty?
 
-    # Procura por padrões como "2-3", "1 a 2", "2 ou 3"
     case texto.to_s
     when /(\d+)\s*[-a]\s*(\d+)/
       [$1.to_i, $2.to_i]
