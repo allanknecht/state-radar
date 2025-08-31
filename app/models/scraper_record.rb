@@ -3,6 +3,6 @@ class ScraperRecord < ApplicationRecord
 
   validates :site, presence: true
   validates :codigo, presence: true,
-                     uniqueness: { scope: [:site, :categoria] }  # << chave composta
-  validates :categoria, presence: true, inclusion: { in: CATEGORIES } # << exige cat
+                     uniqueness: { scope: [:site, :categoria] }
+  validates :categoria, presence: true, inclusion: { in: CATEGORIES }
 end

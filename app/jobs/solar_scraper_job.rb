@@ -85,7 +85,6 @@ class SolarScraperJob < ApplicationJob
       categoria: r[:categoria],
       titulo: r[:titulo].to_s.strip.presence,
       localizacao: r[:localizacao].to_s.strip.presence,
-      cidade: r[:cidade].to_s.strip.presence,          # <- AQUI
       link: r[:link].to_s.strip,
       imagem: r[:imagem].to_s.strip.presence,
       preco_brl: preco_brl,

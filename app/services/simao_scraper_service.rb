@@ -76,14 +76,11 @@ class CardParser
   end
 
   def parse
-    loc = extract_location
-
     {
       categoria: extract_category,
       codigo: extract_code,
       titulo: extract_title,
-      localizacao: loc,
-      cidade: extract_city_from_location(loc),  # <- AQUI
+      localizacao: extract_location,
       link: extract_link,
       imagem: extract_image,
       preco_brl: extract_price,
@@ -92,32 +89,6 @@ class CardParser
   end
 
   private
-
-  def extract_city_from_location(loc)
-    text = @scraper.send(:squish, loc).to_s
-    return nil if text.empty?
-
-    # Casos típicos observados:
-    # "Cerâmica , ERECHIM"  => último token é a cidade
-    # "Taquara"             => a string toda é a cidade
-    candidate = if text.include?(",")
-        text.split(",").last
-      else
-        text
-      end
-
-    normalize_city(candidate)
-  end
-
-  def normalize_city(str)
-    c = @scraper.send(:squish, str).to_s
-    # remove sufixos de UF e parenteses finais comuns
-    c = c.gsub(/\/[A-Z]{2}\z/i, "") # "/RS"
-         .gsub(/\s*-\s*[A-Z]{2}\z/i, "") # "- RS"
-         .gsub(/\s*\([^)]*\)\z/, "") # "(...)" no fim
-         .strip
-    c.presence
-  end
 
   def extract_category
     badge = @scraper.send(:squish, @node.at_css(".product-badge li")&.text)
@@ -210,54 +181,12 @@ class PropertyDetailsExtractor
 
   private
 
-  def extract_city_from_detail(doc, loc_text)
-    # 1) tentar pela label sob h1 (ex.: "... - BAIRRO - ERECHIM/RS")
-    city = city_from_location_string(loc_text)
-    return city if city
-
-    # 2) fallback via h1 com "em CIDADE"
-    h1 = squish(doc.at_css("h1")&.text).to_s
-    if (m = h1.match(/\bem\s+([A-ZÁÂÃÀÉÊÍÓÔÕÚÇ][A-Za-zÁÂÃÀÉÊÍÓÔÕÚÇ\s\-]+)\b/i))
-      return normalize_city(m[1])
-    end
-
-    nil
-  end
-
-  def city_from_location_string(text)
-    t = squish(text).to_s
-    return nil if t.empty?
-
-    # Padrão comum: "- CIDADE/UF" no final
-    if (m = t.match(/-\s*([^-\n\/]+)(?:\/[A-Z]{2})?\s*\z/))
-      return normalize_city(m[1])
-    end
-
-    # Fallback: último token após vírgula
-    if t.include?(",")
-      return normalize_city(t.split(",").last)
-    end
-
-    normalize_city(t)
-  end
-
-  def normalize_city(str)
-    s = squish(str).to_s
-    s = s.gsub(/\/[A-Z]{2}\z/i, "") # "/RS"
-         .gsub(/\s*-\s*[A-Z]{2}\z/i, "") # "- RS"
-         .strip
-    s.presence
-  end
-
   def extract_basic_info(doc)
-    loc_detail = extract_location_from_detail(doc)
-
     {
       titulo: squish(doc.at_css("h1")&.text),
       categoria: extract_category_from_meta(doc),
       codigo: extract_code_from_meta(doc),
-      localizacao: loc_detail,
-      cidade: extract_city_from_detail(doc, loc_detail),  # <- AQUI
+      localizacao: extract_location_from_detail(doc),
       preco_brl: extract_price_from_detail(doc),
     }
   end
