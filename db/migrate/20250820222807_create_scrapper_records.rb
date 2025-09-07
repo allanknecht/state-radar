@@ -1,6 +1,6 @@
-class CreateScrapperRecords < ActiveRecord::Migration[8.0]
+class CreatescraperRecords < ActiveRecord::Migration[8.0]
   def change
-    create_table :scrapper_records do |t|
+    create_table :scraper_records do |t|
       t.string :site
       t.string :categoria
       t.string :codigo

@@ -1,6 +1,6 @@
 require "test_helper"
 
-class scraperRecordTest < ActiveSupport::TestCase
+class SimaoScraperJobTest < ActiveJob::TestCase
   # test "the truth" do
   #   assert true
   # end

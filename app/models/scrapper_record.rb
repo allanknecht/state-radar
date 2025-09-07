@@ -1,2 +1,0 @@
-class ScrapperRecord < ApplicationRecord
-end
