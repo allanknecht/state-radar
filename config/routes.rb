@@ -8,15 +8,16 @@ Rails.application.routes.draw do
 
     namespace :v1 do
       resources :scraper_records, only: %i[index show]
-      devise_for :users,
-        path: "",
-        path_names: { sign_in: "users/sign_in", sign_out: "users/sign_out" },
-        controllers: {
-          sessions: "api/v1/users/sessions",
-          registrations: "api/v1/users/registrations",
-        }
 
       resources :properties, only: [:index, :show]
+
+      devise_for :users,
+                 path: "users",
+                 defaults: { format: :json },
+                 controllers: {
+                   sessions: "api/v1/users/sessions",
+                   registrations: "api/v1/users/registrations",
+                 }
     end
   end
 end

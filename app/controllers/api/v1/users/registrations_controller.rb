@@ -13,6 +13,10 @@ module Api
             render json: { errors: resource.errors.full_messages }, status: :unprocessable_entity
           end
         end
+
+        def sign_up_params
+          params.require(:user).permit(:email, :password, :password_confirmation)
+        end
       end
     end
   end

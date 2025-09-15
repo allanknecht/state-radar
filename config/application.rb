@@ -18,5 +18,7 @@ module PiCincoWeb
 
     # App somente API
     config.api_only = true
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore, key: "_myapp_session"
   end
 end

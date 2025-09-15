@@ -11,6 +11,7 @@ module Api
         end
 
         def respond_to_on_destroy
+          # Para JTIMatcher, um sign_out válido invalida o token (rota DELETE /sign_out)
           head :no_content
         end
       end
