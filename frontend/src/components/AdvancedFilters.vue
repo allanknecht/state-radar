@@ -171,6 +171,7 @@ function updateFilters() {
 function applyFilters() {
   updateFilters()
   emit('apply')
+  toggleAdvanced()
 }
 
 function clearFilters() {
