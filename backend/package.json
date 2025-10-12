@@ -1,0 +1,60 @@
+{
+  "name": "sistema-busca-imoveis",
+  "version": "1.0.0",
+  "description": "Sistema completo de busca de imóveis com backend Rails API e frontend Vue.js",
+  "private": true,
+  "scripts": {
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && bundle install",
+    "install:frontend": "cd frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && rails server -p 3001",
+    "dev:frontend": "cd frontend && npm run dev",
+    "test:backend": "cd backend && rails test",
+    "test:frontend": "cd frontend && npm run test",
+    "test:all": "npm run test:backend && npm run test:frontend",
+    "build": "npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "deploy": "npm run deploy:backend && npm run deploy:frontend",
+    "deploy:backend": "cd backend && git subtree push --prefix=backend heroku main",
+    "deploy:frontend": "cd frontend && npm run build && npm run deploy",
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:clean": "docker-compose down -v && docker system prune -f",
+    "db:setup": "cd backend && rails db:create db:migrate db:seed",
+    "db:reset": "cd backend && rails db:drop db:create db:migrate db:seed",
+    "scrape": "cd backend && rails scrapers:run_all",
+    "scrape:solar": "cd backend && rails scrapers:run solar",
+    "scrape:simao": "cd backend && rails scrapers:run simao",
+    "scrape:mws": "cd backend && rails scrapers:run mws",
+    "lint:backend": "cd backend && rubocop",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:all": "npm run lint:backend && npm run lint:frontend",
+    "format:backend": "cd backend && rubocop -A",
+    "format:frontend": "cd frontend && npm run format",
+    "format:all": "npm run format:backend && npm run format:frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "real-estate",
+    "scraping",
+    "rails",
+    "vue",
+    "api",
+    "imoveis",
+    "busca"
+  ],
+  "author": "Allan Knecht",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seu-usuario/sistema-busca-imoveis.git"
+  },
+  "bugs": {
+    "url": "https://github.com/seu-usuario/sistema-busca-imoveis/issues"
+  },
+  "homepage": "https://github.com/seu-usuario/sistema-busca-imoveis#readme"
+}

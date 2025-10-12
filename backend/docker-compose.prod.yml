@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Production)
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-sistema_busca_imoveis_production}
+      POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis for Background Jobs (Production)
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Rails Backend API (Production)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - RAILS_ENV=production
+      - DATABASE_URL=postgresql://${DATABASE_USERNAME:-postgres}:${DATABASE_PASSWORD}@db:5432/${DATABASE_NAME:-sistema_busca_imoveis_production}
+      - REDIS_URL=redis://redis:6379/0
+      - DEVISE_JWT_SECRET_KEY=${DEVISE_JWT_SECRET_KEY}
+      - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "
+        bundle install --without development test &&
+        rails db:create db:migrate &&
+        bundle exec rails server -b 0.0.0.0 -p 3000 -e production
+      "
+    restart: unless-stopped
+
+  # Vue.js Frontend (Production)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=${API_BASE_URL:-http://localhost:3001}
+      - VITE_APP_TITLE=${APP_TITLE:-Sistema de Busca de Imóveis}
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Sidekiq for Background Jobs (Production)
+  sidekiq:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - RAILS_ENV=production
+      - DATABASE_URL=postgresql://${DATABASE_USERNAME:-postgres}:${DATABASE_PASSWORD}@db:5432/${DATABASE_NAME:-sistema_busca_imoveis_production}
+      - REDIS_URL=redis://redis:6379/0
+      - DEVISE_JWT_SECRET_KEY=${DEVISE_JWT_SECRET_KEY}
+      - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: bundle exec sidekiq
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy (Production)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: sistema-busca-imoveis-prod-network
