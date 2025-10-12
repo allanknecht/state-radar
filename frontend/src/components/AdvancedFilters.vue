@@ -1,7 +1,6 @@
 <template>
   <div class="advanced-filters">
     <div class="filters-header">
-      <h3>Filtros Avançados</h3>
       <button @click="toggleAdvanced" class="toggle-btn">
         {{ showAdvanced ? 'Ocultar' : 'Mostrar' }} Filtros
       </button>
@@ -75,11 +74,12 @@
         <div class="filter-group">
           <label>Ordenar por:</label>
           <select v-model="sortBy" class="filter-select" @change="updateFilters">
-            <option value="">Mais recentes</option>
+            <option value="">Padrão</option>
             <option value="price_asc">Menor preço</option>
             <option value="price_desc">Maior preço</option>
           </select>
         </div>
+        
       </div>
       
       <div class="filter-actions">
@@ -138,7 +138,6 @@ const sortBy = ref(props.sortBy)
 const selectedSite = ref(props.selectedSite)
 const selectedCategory = ref(props.selectedCategory)
 
-// Watchers para sincronizar com props
 watch(() => props.minPrice, (newValue) => { minPrice.value = newValue })
 watch(() => props.maxPrice, (newValue) => { maxPrice.value = newValue })
 watch(() => props.minBedrooms, (newValue) => { minBedrooms.value = newValue })
@@ -146,7 +145,6 @@ watch(() => props.sortBy, (newValue) => { sortBy.value = newValue })
 watch(() => props.selectedSite, (newValue) => { selectedSite.value = newValue })
 watch(() => props.selectedCategory, (newValue) => { selectedCategory.value = newValue })
 
-// Função para formatar o nome do site
 function formatSiteName(site) {
   const siteNames = {
     'mws': 'MWS',
@@ -188,50 +186,53 @@ function clearFilters() {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 .advanced-filters {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  margin-bottom: 2rem;
-  overflow: hidden;
+  position: relative;
+  z-index: 10;
 }
 
 .filters-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 1.5rem;
-  background: #f8fafc;
-  border-bottom: 1px solid #e1e5e9;
-}
 
-.filters-header h3 {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0;
+  background: #f9fafb;
+
 }
 
 .toggle-btn {
-  background: #667eea;
+  background: #3b82f6;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .toggle-btn:hover {
-  background: #5a67d8;
-  transform: translateY(-1px);
+  background: #2563eb;
 }
 
 .filters-content {
-  padding: 1.5rem;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 400px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  padding: 1rem;
+  z-index: 20;
+  margin-top: 8px;
 }
 
 .filter-row {
@@ -248,74 +249,86 @@ function clearFilters() {
 }
 
 .filter-group label {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: #374151;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .filter-input, .filter-select {
-  padding: 12px 16px;
-  border: 2px solid #e1e5e9;
-  border-radius: 8px;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  transition: all 0.2s ease;
   background: white;
+  color: #1f2937;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .filter-input:focus, .filter-select:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .filter-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   justify-content: flex-end;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e1e5e9;
+  border-top: 1px solid #e5e7eb;
 }
 
 .btn {
-  padding: 12px 24px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 15px;
-  font-weight: 600;
+  border-radius: 6px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #3b82f6;
   color: white;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  background: #2563eb;
 }
 
 .btn-secondary {
-  background: #f8fafc;
+  background: #f9fafb;
   color: #374151;
-  border: 2px solid #e1e5e9;
+  border: 1px solid #d1d5db;
 }
 
 .btn-secondary:hover {
-  background: #e1e5e9;
+  background: #f3f4f6;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
+  .filters-content {
+    width: calc(100vw - 2rem);
+    right: 1rem;
+    left: 1rem;
+  }
+  
   .filter-row {
     grid-template-columns: 1fr;
   }

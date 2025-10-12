@@ -3,7 +3,6 @@ require "digest/sha1"
 class PropertyScraperJob < ApplicationJob
   queue_as :default
 
-  # Use strings instead of class constants to avoid loading issues
   SCRAPER_CLASS_NAMES = {
     mws: "MwsScraperService",
     simao: "SimaoScraperService",
@@ -21,7 +20,6 @@ class PropertyScraperJob < ApplicationJob
   private
 
   def scrape_site(scraper_name)
-    # Lazy load the scraper class when needed
     scraper_class_name = SCRAPER_CLASS_NAMES[scraper_name]
     raise ArgumentError, "Unknown scraper: #{scraper_name}" unless scraper_class_name
 
@@ -40,31 +38,25 @@ class PropertyScraperJob < ApplicationJob
   end
 
   def upsert_record!(record, scraper_name)
-    # Ensure site is set
     record[:site] ||= scraper_name.to_s
 
-    # Normalize category
     record[:categoria] = normalize_categoria(record[:categoria])
 
-    # Generate/normalize code
     fallback_hash = Digest::SHA1.hexdigest(record[:link].to_s)[0, 16]
     code = record[:codigo].presence || fallback_hash
 
-    # Validate required fields
     missing = validate_required_fields(record, code)
     if missing.any?
       warn "[#{scraper_name.upcase}Job] SKIP: missing #{missing.join(", ")} (link=#{record[:link].inspect})"
       return
     end
 
-    # Find or create record
     db_record = ScraperRecord.find_or_initialize_by(
       site: record[:site],
       codigo: code,
       categoria: record[:categoria],
     )
 
-    # Assign attributes with proper type conversion
     assign_record_attributes(db_record, record)
 
     db_record.save!
@@ -98,6 +90,8 @@ class PropertyScraperJob < ApplicationJob
       vagas_max: safe_integer(record[:vagas_max]),
       descricao: safe_string(record[:descricao]),
       amenities: merge_amenities(db_record.amenities, record[:amenities]),
+      iptu_parcelas: safe_string(record[:iptu_parcelas]),
+      condominio_parcelas: safe_string(record[:condominio_parcelas]),
     )
   end
 

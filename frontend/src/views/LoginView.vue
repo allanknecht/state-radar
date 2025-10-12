@@ -87,17 +87,17 @@ const submit = async () => {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: #f8fafc;
 }
 
 .login-card {
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  padding: 3rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
   width: 100%;
-  max-width: 420px;
-  border: 1px solid #e1e5e9;
+  max-width: 400px;
+  border: 1px solid #e5e7eb;
 }
 
 .login-header {
@@ -106,30 +106,33 @@ const submit = async () => {
 }
 
 .login-title {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 2rem;
-  font-weight: 800;
-  color: #1f2937;
+  font-family: var(--font-heading);
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #111827;
   margin: 0 0 0.5rem 0;
   letter-spacing: -0.02em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .success-message {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   color: #059669;
   font-size: 14px;
   font-weight: 500;
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
   margin: 0;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .form-group {
@@ -139,56 +142,60 @@ const submit = async () => {
 }
 
 .form-label {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: #374151;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .form-input {
-  padding: 14px 16px;
-  border: 2px solid #e1e5e9;
-  border-radius: 12px;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 16px;
-  font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 400;
+  transition: all 0.2s ease;
   background: white;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .login-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #3b82f6;
   color: white;
   border: none;
-  border-radius: 12px;
-  padding: 16px 24px;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-top: 1rem;
+  gap: 6px;
+  margin-top: 0.5rem;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .login-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  background: #2563eb;
 }
 
 .login-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
 }
 
 .login-btn.loading {
@@ -213,40 +220,46 @@ const submit = async () => {
   background: #fef2f2;
   border: 1px solid #fecaca;
   color: #dc2626;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: var(--font-primary);
   font-size: 14px;
   font-weight: 500;
   text-align: center;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .login-footer {
   text-align: center;
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e1e5e9;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
 }
 
 .login-footer p {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   color: #6b7280;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   margin: 0 0 0.5rem 0;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .register-link {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  color: #667eea;
+  font-family: var(--font-primary);
+  color: #3b82f6;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 14px;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .register-link:hover {
-  color: #5a67d8;
+  color: #1d4ed8;
 }
 
 /* Responsividade */

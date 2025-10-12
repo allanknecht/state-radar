@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_15_005014) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_12_154257) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -47,6 +47,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_15_005014) do
     t.integer "vagas_min"
     t.integer "vagas_max"
     t.text "descricao"
+    t.string "iptu_parcelas"
+    t.string "condominio_parcelas"
     t.index ["amenities"], name: "index_scraper_records_on_amenities", using: :gin
     t.index ["categoria"], name: "index_scraper_records_on_categoria"
     t.index ["localizacao"], name: "index_scraper_records_on_localizacao"

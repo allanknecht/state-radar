@@ -5,18 +5,47 @@
       @logout="sair"
     />
 
-    <!-- Filtros Avançados -->
-    <AdvancedFilters
-      v-model:minPrice="minPrice"
-      v-model:maxPrice="maxPrice"
-      v-model:minBedrooms="minBedrooms"
-      v-model:sortBy="sortBy"
-      v-model:selectedSite="selectedSite"
-      v-model:selectedCategory="selectedCategory"
-      :available-sites="availableSites"
-      :available-categories="availableCategories"
-      @apply="handleSearch"
-    />
+    <!-- Barra de Filtros e Busca -->
+    <div class="filters-container">
+      <!-- Busca por Texto -->
+      <div class="search-section">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20">
+            <path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"/>
+          </svg>
+          <input
+            v-model="searchText"
+            @input="handleSearchText"
+            type="text"
+            placeholder="Buscar por código, nome, localização..."
+            class="search-input"
+          />
+          <button v-if="searchText" @click="clearSearch" class="clear-search">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+            </svg>
+          </button>
+        </div>
+        <div v-if="searchText" class="search-results-info">
+          {{ searchResultsCount }} resultado(s) para "{{ searchText }}"
+        </div>
+      </div>
+
+      <!-- Filtros Avançados -->
+      <div class="advanced-filters-section">
+        <AdvancedFilters
+          v-model:minPrice="minPrice"
+          v-model:maxPrice="maxPrice"
+          v-model:minBedrooms="minBedrooms"
+          v-model:sortBy="sortBy"
+          v-model:selectedSite="selectedSite"
+          v-model:selectedCategory="selectedCategory"
+          :available-sites="availableSites"
+          :available-categories="availableCategories"
+          @apply="handleSearch"
+        />
+      </div>
+    </div>
 
     <!-- Loading e Error States -->
     <div v-if="loading" class="loading-state">
@@ -92,22 +121,21 @@ const perPage = ref(20)
 const availableSites = ref([])
 const availableCategories = ref([])
 
-// Filtros básicos
 const selectedCategory = ref('')
 const selectedSite = ref('')
 
-// Filtros avançados
 const minPrice = ref('')
 const maxPrice = ref('')
 const minBedrooms = ref('')
 const sortBy = ref('')
 
+// Busca por texto
+const searchText = ref('')
+
 // Agora a filtragem é feita no backend, então usamos imoveis diretamente
 const filteredImoveis = computed(() => imoveis.value)
 
 function handleSearch() {
-  // Função chamada quando os filtros são alterados
-  // Reset para a primeira página quando filtros mudam
   currentPage.value = 1
   fetchImoveis()
 }
@@ -117,13 +145,28 @@ function handlePageChange(page) {
   fetchImoveis()
 }
 
+// Funções de busca por texto
+function handleSearchText() {
+  currentPage.value = 1
+  fetchImoveis()
+}
+
+function clearSearch() {
+  searchText.value = ''
+  handleSearchText()
+}
+
+const searchResultsCount = computed(() => {
+  if (!searchText.value) return imoveis.value.length
+  return filteredImoveis.value.length
+})
+
 async function fetchSites() {
   try {
     const { data } = await api.get('/scraper_records/sites')
     availableSites.value = data.data || []
   } catch (e) {
     console.warn('Erro ao buscar sites, usando valores padrão:', e.message)
-    // Fallback para valores padrão
     availableSites.value = ['mws', 'simao', 'outros']
   }
 }
@@ -134,7 +177,6 @@ async function fetchCategories() {
     availableCategories.value = data.data || []
   } catch (e) {
     console.warn('Erro ao buscar categorias, usando valores padrão:', e.message)
-    // Fallback para valores padrão
     availableCategories.value = ['Venda', 'Aluguel']
   }
 }
@@ -143,20 +185,16 @@ async function fetchImoveis() {
   loading.value = true
   error.value = ''
   try {
-    // Construir parâmetros de query baseados nos filtros ativos
     const params = new URLSearchParams()
     
-    // Filtro de categoria
     if (selectedCategory.value) {
       params.append('category', selectedCategory.value)
     }
     
-    // Filtro de site
     if (selectedSite.value) {
       params.append('site', selectedSite.value)
     }
     
-    // Filtros de preço
     if (minPrice.value) {
       params.append('min_price', minPrice.value)
     }
@@ -164,9 +202,13 @@ async function fetchImoveis() {
       params.append('max_price', maxPrice.value)
     }
     
-    // Filtro de dormitórios mínimos
     if (minBedrooms.value) {
       params.append('min_bedrooms', minBedrooms.value)
+    }
+    
+    // Busca por texto
+    if (searchText.value) {
+      params.append('search', searchText.value)
     }
     
     // Ordenação
@@ -180,7 +222,7 @@ async function fetchImoveis() {
     const queryString = params.toString()
     const url = queryString ? `/scraper_records?${queryString}` : '/scraper_records'
     
-    console.log('Fazendo requisição para:', url) // Debug
+    console.log('Fazendo requisição para:', url)
     
     const { data } = await api.get(url)
     
@@ -195,7 +237,6 @@ async function fetchImoveis() {
       perPage.value = data.meta.per || 20
     }
     
-    // Log para debug (pode ser removido em produção)
     console.log('Dados recebidos:', {
       imoveis: imoveis.value.length,
       meta: data.meta,
@@ -258,9 +299,10 @@ onMounted(async () => {
 
 <style scoped>
 .imoveis-container {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  box-sizing: border-box;
 }
 
 
@@ -318,8 +360,8 @@ onMounted(async () => {
 /* Grid de Imóveis */
 .imoveis-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
@@ -370,7 +412,7 @@ onMounted(async () => {
   
   .imoveis-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
   }
   
   .imovel-details {
@@ -390,6 +432,117 @@ onMounted(async () => {
   
   .price-value {
     font-size: 1.25rem;
+  }
+}
+
+/* Container de Filtros e Busca */
+.filters-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  margin: 1.5rem 0;
+  padding: 0 1rem;
+  flex-wrap: wrap;
+}
+
+.search-section {
+  flex: 1;
+  min-width: 300px;
+}
+
+.advanced-filters-section {
+  flex-shrink: 0;
+}
+
+.search-box {
+  position: relative;
+  max-width: 500px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 48px 12px 48px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: var(--font-primary);
+  background: white;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.clear-search {
+  position: absolute;
+  right: -80px;
+  top: 56%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+  height: 24px;
+}
+
+.clear-search:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.search-results-info {
+  text-align: center;
+  margin-top: 0.5rem;
+  color: #6b7280;
+  font-size: 14px;
+  font-family: var(--font-primary);
+}
+
+@media (max-width: 768px) {
+  .filters-container {
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 0 0.5rem;
+  }
+  
+  .search-section {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .search-box {
+    max-width: none;
+  }
+  
+  .search-input {
+    padding: 10px 44px 10px 44px;
+    font-size: 14px;
+  }
+  
+  .search-icon {
+    left: 14px;
+    width: 16px;
+    height: 16px;
+  }
+  
+  .clear-search {
+    right: 10px;
   }
 }
 

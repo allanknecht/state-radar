@@ -84,22 +84,22 @@ docker-compose up --build
 docker-compose exec backend rails db:migrate
 
 # Acessar a aplicação
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:3001
+# Frontend: http://localhost:3001
+# Backend API: http://localhost:3000
 ```
 
 ### Desenvolvimento Local
 ```bash
-# Backend
-cd backend
-bundle install
-rails db:create db:migrate
-rails server -p 3001
+# Backend (Docker - Recomendado)
+docker-compose up backend -d
 
-# Frontend (em outro terminal)
+# Frontend (Local)
 cd frontend
 npm install
 npm run dev
+
+# Ou usar script do monorepo
+npm run dev:frontend
 ```
 
 ## 📚 Documentação

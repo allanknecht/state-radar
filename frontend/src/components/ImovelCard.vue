@@ -6,7 +6,7 @@
         :alt="imovel.titulo"
         @error="handleImageError"
       >
-      <div class="imovel-badge">{{ imovel.categoria }}</div>
+      <div class="imovel-badge font-heading">{{ imovel.categoria }}</div>
     </div>
     
     <div class="imovel-content">
@@ -44,9 +44,9 @@
       </div>
       
       <div class="imovel-price">
-        <span class="price-value">R$ {{ formatPrice(imovel.preco_brl) }}</span>
-        <span v-if="imovel.condominio" class="condominio">
-          Condomínio: R$ {{ formatPrice(imovel.condominio) }}
+        <span class="price-value">{{ imovel.preco_formatado || 'Preço indisponível' }}</span>
+        <span v-if="imovel.condominio_formatado" class="condominio">
+          Condomínio: {{ imovel.condominio_formatado }}
         </span>
       </div>
       
@@ -83,18 +83,21 @@ function handleImageError(event) {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap');
 .imovel-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-  border: 1px solid #e1e5e9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  border: 1px solid #e5e7eb;
 }
 
 .imovel-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .imovel-image {
@@ -107,55 +110,61 @@ function handleImageError(event) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
 }
 
 .imovel-card:hover .imovel-image img {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
-.imovel-badge {
+.imovel-badge,
+.imovel-badge.font-heading,
+div.imovel-badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  top: 8px;
+  right: 8px;
+  background: #3b82f6;
   color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .imovel-content {
-  padding: 1.5rem;
+  padding: 0.875rem;
 }
 
 .imovel-title {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1f2937;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
   margin: 0 0 0.5rem 0;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .imovel-location {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   color: #6b7280;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   margin: 0 0 1rem 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  letter-spacing: 0.015em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .imovel-details {
@@ -168,36 +177,41 @@ function handleImageError(event) {
 .detail-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   color: #6b7280;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .detail-icon {
-  color: #667eea;
+  color: #9ca3af;
 }
 
 .imovel-price {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .price-value {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
   color: #059669;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .condominio {
   display: block;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
   color: #6b7280;
-  margin-top: 4px;
+  margin-top: 2px;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .imovel-actions {
@@ -207,27 +221,29 @@ function handleImageError(event) {
 
 /* Botões */
 .btn {
-  padding: 12px 24px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 6px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #3b82f6;
   color: white;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  background: #2563eb;
 }
 
 /* Responsividade */

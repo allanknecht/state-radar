@@ -1,6 +1,3 @@
-# app/services/mws_scraper_service.rb
-
-# Force remove all related constants to prevent superclass mismatch
 %w[
   MwsScraperService
   MwsScraperServiceCardParser
@@ -32,9 +29,7 @@ class MwsScraperService < BaseScraperService
 end
 
 class MwsScraperServiceCardParser < BaseCardParser
-  # All common functionality is inherited, add any MWS-specific overrides here if needed
 end
 
 class MwsScraperServicePropertyDetailsExtractor < BasePropertyDetailsExtractor
-  # All common functionality is inherited, add any MWS-specific overrides here if needed
 end

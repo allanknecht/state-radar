@@ -78,7 +78,9 @@ class BasePropertyDetailsExtractor
   def extract_location_from_detail(doc)
     location_text = squish(doc.at_css("h1 ~ label")&.text)
 
-    if location_text && location_text.include?("Rua")
+    if location_text && location_text.match?(/\d+.*-.*-.*\//)
+      return location_text
+    elsif location_text && location_text.include?("Rua")
       location_text.gsub(/.*?Rua/, "Rua").strip
     elsif location_text&.include?(" - ")
       parts = location_text.split(" - ")
@@ -99,7 +101,6 @@ class BasePropertyDetailsExtractor
       end
     end
 
-    # Strategy 2: H4 with price info
     h4 = doc.css("h4").find { |n| n.text =~ /valor do im[oó]vel/i }
     if h4
       text = squish(h4.text)
@@ -107,11 +108,24 @@ class BasePropertyDetailsExtractor
       return price if price
     end
 
-    # Strategy 3: Any element containing R$
+    doc.css("h4").each do |h4|
+      h4_text = h4.text
+      if h4_text =~ /valor do im[oó]vel/i
+        full_text = h4.inner_html
+        clean_text = full_text.gsub(/<[^>]*>/, " ").gsub(/\s+/, " ").strip
+        price = parse_brl(clean_text)
+        return price if price
+      end
+    end
+
     price_elements = doc.css("*").select { |el| el.text.include?("R$") }
     price_elements.each do |el|
       price = parse_brl(el.text)
-      return price if price && price > 1000
+      if price.is_a?(Hash)
+        return price[:value] if price[:value] && price[:value] > 1000
+      elsif price && price > 1000
+        return price
+      end
     end
 
     nil
@@ -128,6 +142,8 @@ class BasePropertyDetailsExtractor
       **extract_vagas_info(details),
       condominio: extract_condominio(details),
       iptu: extract_iptu(details),
+      condominio_parcelas: extract_condominio_parcelas(details),
+      iptu_parcelas: extract_iptu_parcelas(details),
       mobiliacao: extract_mobiliacao(details, doc),
       tipo_imovel: extract_property_type(details),
     }.compact
@@ -168,13 +184,45 @@ class BasePropertyDetailsExtractor
   def extract_condominio(details)
     condominio_value = details["Condomínio"]
     return nil if condominio_value == "Consulte"
-    parse_brl(condominio_value)
+    result = parse_brl(condominio_value)
+
+    if result.is_a?(Hash)
+      return result[:value]
+    end
+    result
   end
 
   def extract_iptu(details)
     iptu_value = details["IPTU"]
     return nil if iptu_value == "Consulte"
-    parse_brl(iptu_value)
+    result = parse_brl(iptu_value)
+
+    if result.is_a?(Hash)
+      return result[:value]
+    end
+    result
+  end
+
+  def extract_condominio_parcelas(details)
+    condominio_value = details["Condomínio"]
+    return nil if condominio_value == "Consulte"
+    result = parse_brl(condominio_value)
+
+    if result.is_a?(Hash)
+      return result[:installments]
+    end
+    nil
+  end
+
+  def extract_iptu_parcelas(details)
+    iptu_value = details["IPTU"]
+    return nil if iptu_value == "Consulte"
+    result = parse_brl(iptu_value)
+
+    if result.is_a?(Hash)
+      return result[:installments]
+    end
+    nil
   end
 
   def extract_property_type(details)
@@ -214,9 +262,6 @@ class BasePropertyDetailsExtractor
     {
       area_m2: areas[:area_privativa_m2] || areas[:area_construida_m2] || areas[:area_total_m2],
       area_privativa_m2: areas[:area_privativa_m2],
-      area_total_m2: areas[:area_total_m2],
-      area_terreno_m2: areas[:area_terreno_m2],
-      area_privativa_comum_m2: areas[:area_comum_m2],
     }.compact
   end
 
@@ -330,7 +375,6 @@ class BasePropertyDetailsExtractor
   end
 
   def find_amenities_container(h4)
-    # Try multiple container patterns
     [
       h4.xpath("following-sibling::*").find { |n| n["class"].to_s.include?("property-details-amenities") },
       h4.next_element&.css(".ltn__menu-widget ul li")&.any? ? h4.next_element : nil,
@@ -338,7 +382,6 @@ class BasePropertyDetailsExtractor
   end
 
   def extract_amenities_from_container(container, amenities)
-    # Try different amenity selectors
     selectors = [
       "label.checkbox-item",
       ".ltn__menu-widget ul li",

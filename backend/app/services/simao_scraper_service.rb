@@ -1,6 +1,3 @@
-# app/services/simao_scraper_service.rb
-
-# Force remove all related constants to prevent superclass mismatch (dev/reload safety)
 %w[
   SimaoScraperService
   SimaoScraperServiceCardParser
@@ -33,9 +30,7 @@ class SimaoScraperService < BaseScraperService
 end
 
 class SimaoScraperServiceCardParser < BaseCardParser
-  # All common functionality is inherited
 end
 
 class SimaoScraperServicePropertyDetailsExtractor < BasePropertyDetailsExtractor
-  # All common functionality is inherited
 end

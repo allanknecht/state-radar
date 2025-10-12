@@ -1,0 +1,30 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Símbolo da Casa -->
+  <g transform="translate(10, 10)">
+    <!-- Telhado -->
+    <path d="M20 5L30 15L10 15L20 5Z" fill="url(#gradient1)"/>
+    <!-- Casa -->
+    <rect x="12" y="15" width="16" height="12" fill="url(#gradient2)"/>
+    <!-- Porta -->
+    <rect x="17" y="21" width="4" height="6" fill="white"/>
+    <!-- Janelas -->
+    <rect x="13" y="17" width="3" height="3" fill="white"/>
+    <rect x="24" y="17" width="3" height="3" fill="white"/>
+  </g>
+
+  <!-- Texto "stateradar" -->
+  <text x="50" y="35" font-family="'Poppins', sans-serif" font-size="24" font-weight="700" fill="white">
+    stateradar
+  </text>
+
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#667eea;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

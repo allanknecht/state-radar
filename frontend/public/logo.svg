@@ -1,0 +1,40 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Símbolo da Casa -->
+  <g transform="translate(10, 10)">
+    <!-- Telhado -->
+    <path d="M20 5L30 15L10 15L20 5Z" fill="url(#gradient1)"/>
+    <!-- Casa -->
+    <rect x="12" y="15" width="16" height="12" fill="url(#gradient2)"/>
+    <!-- Porta -->
+    <rect x="17" y="21" width="4" height="6" fill="white"/>
+    <!-- Janelas -->
+    <rect x="13" y="17" width="3" height="3" fill="white"/>
+    <rect x="24" y="17" width="3" height="3" fill="white"/>
+    <!-- Chave -->
+    <g transform="translate(35, 18)">
+      <circle cx="3" cy="3" r="2" fill="url(#gradient1)"/>
+      <rect x="4" y="2.5" width="4" height="1" fill="url(#gradient1)"/>
+      <rect x="7" y="1" width="1" height="2" fill="url(#gradient1)"/>
+    </g>
+  </g>
+  
+  <!-- Texto -->
+  <text x="60" y="25" font-family="Poppins, sans-serif" font-size="18" font-weight="700" fill="#1f2937">
+    BuscaImóveis
+  </text>
+  <text x="60" y="40" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#6b7280" letter-spacing="2px">
+    ENCONTRE SEU LAR IDEAL
+  </text>
+  
+  <!-- Gradientes -->
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

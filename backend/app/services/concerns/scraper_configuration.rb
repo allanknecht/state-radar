@@ -1,4 +1,3 @@
-# app/services/concerns/scraper_configuration.rb
 module ScraperConfiguration
   SCRAPER_CONFIGS = {
     mws: {

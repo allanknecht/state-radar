@@ -6,9 +6,9 @@ module Api
       def index
         scope = ScraperRecord.all
 
-        # filtros (só aplicam se o param existir)
         scope = scope.where(categoria: params[:category]) if params[:category].present?
         scope = scope.where(site: params[:site]) if params[:site].present?
+        scope = scope.where(codigo: params[:codigo]) if params[:codigo].present?
 
         min_price = decimal_param(:min_price)
         max_price = decimal_param(:max_price)
@@ -17,6 +17,14 @@ module Api
         scope = scope.where("preco_brl >= ?", min_price) if min_price
         scope = scope.where("preco_brl <= ?", max_price) if max_price
         scope = scope.where("dormitorios >= ?", min_bed) if min_bed
+
+        if (search = params[:search].to_s.strip).present?
+          search = ActiveRecord::Base.sanitize_sql_like(search)
+          scope = scope.where(
+            "codigo ILIKE ? OR titulo ILIKE ? OR localizacao ILIKE ?",
+            "%#{search}%", "%#{search}%", "%#{search}%"
+          )
+        end
 
         if (q = params[:q].to_s.strip).present?
           q = ActiveRecord::Base.sanitize_sql_like(q)
@@ -29,7 +37,6 @@ module Api
         else scope = scope.order(created_at: :desc, id: :desc)
         end
 
-        # paginação: sempre 20 por página
         page = int_param(:page, default: 1, min: 1)
         records = scope.page(page).per(20)
 
@@ -44,7 +51,6 @@ module Api
         }
       end
 
-      # GET /scraper_records/:id
       def show
         record = ScraperRecord.find_by(id: params[:id])
         if record
@@ -54,14 +60,30 @@ module Api
         end
       end
 
-      # GET /scraper_records/sites
       def sites
         render json: { data: ScraperRecord::SITES }
       end
 
-      # GET /scraper_records/categories
       def categories
         render json: { data: ScraperRecord::CATEGORIES }
+      end
+
+      def by_code
+        records = ScraperRecord.where(codigo: params[:codigo])
+
+        if records.any?
+          render json: {
+            data: records.map { |r| serialize_record(r) },
+            meta: { count: records.count },
+          }
+        else
+          render json: {
+            error: {
+              code: "not_found",
+              message: "Nenhum imóvel encontrado com o código '#{params[:codigo]}'",
+            },
+          }, status: :not_found
+        end
       end
 
       private
@@ -71,12 +93,17 @@ module Api
           "id", "site", "categoria", "codigo", "titulo", "localizacao", "link", "imagem",
           "preco_brl", "dormitorios", "suites", "vagas", "area_m2", "condominio", "iptu",
           "banheiros", "lavabos", "area_privativa_m2", "mobiliacao", "amenities", "descricao",
-          "created_at", "updated_at"
+          "iptu_parcelas", "condominio_parcelas", "created_at", "updated_at"
         )
         %w[preco_brl condominio iptu area_m2 area_privativa_m2].each do |k|
           v = attrs[k]
           attrs[k] = v.nil? ? nil : v.to_f
         end
+
+        attrs["preco_formatado"] = record.preco_formatado
+        attrs["iptu_formatado"] = record.iptu_formatado
+        attrs["condominio_formatado"] = record.condominio_formatado
+
         attrs
       end
     end

@@ -180,7 +180,6 @@ async function handleRegister() {
     // Sucesso no cadastro
     console.log('Usuário criado com sucesso:', response.data)
     
-    // Redirecionar para login com mensagem de sucesso
     router.push({
       name: 'login',
       query: { 
@@ -234,7 +233,7 @@ async function handleRegister() {
 }
 
 .register-title {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 2rem;
   font-weight: 800;
   color: #1f2937;
@@ -243,7 +242,7 @@ async function handleRegister() {
 }
 
 .register-subtitle {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   color: #6b7280;
   font-size: 1rem;
   font-weight: 500;
@@ -263,7 +262,7 @@ async function handleRegister() {
 }
 
 .form-label {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 14px;
   font-weight: 600;
   color: #374151;
@@ -273,7 +272,7 @@ async function handleRegister() {
   padding: 14px 16px;
   border: 2px solid #e1e5e9;
   border-radius: 12px;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 16px;
   font-weight: 500;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -292,7 +291,7 @@ async function handleRegister() {
 }
 
 .error-message {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 14px;
   color: #dc2626;
   font-weight: 500;
@@ -304,7 +303,7 @@ async function handleRegister() {
   border: none;
   border-radius: 12px;
   padding: 16px 24px;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -351,7 +350,7 @@ async function handleRegister() {
   color: #dc2626;
   padding: 12px 16px;
   border-radius: 8px;
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   font-size: 14px;
   font-weight: 500;
   text-align: center;
@@ -365,7 +364,7 @@ async function handleRegister() {
 }
 
 .register-footer p {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   color: #6b7280;
   font-size: 14px;
   font-weight: 500;
@@ -373,7 +372,7 @@ async function handleRegister() {
 }
 
 .login-link {
-  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-primary);
   color: #667eea;
   text-decoration: none;
   font-weight: 600;

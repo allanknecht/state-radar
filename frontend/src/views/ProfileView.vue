@@ -6,6 +6,7 @@
     />
 
     <div class="profile-content">
+
       <div class="profile-card">
         <div class="profile-header">
           <h2>Meu Perfil</h2>
@@ -19,10 +20,6 @@
             <div class="info-item">
               <label>Email:</label>
               <span>{{ user?.email || 'Carregando...' }}</span>
-            </div>
-            <div class="info-item">
-              <label>Membro desde:</label>
-              <span>{{ formatDate(user?.created_at) }}</span>
             </div>
           </div>
         </div>
@@ -86,17 +83,11 @@
         </div>
 
         <!-- Deletar Conta -->
-        <div class="profile-section danger-section">
-          <h3>Zona de Perigo</h3>
-          <div class="danger-content">
-            <div class="warning-text">
-              <strong>Atenção:</strong> Deletar sua conta é uma ação irreversível. 
-              Todos os seus dados serão permanentemente removidos.
-            </div>
-            
+        <div class="profile-section">
+          <div class="delete-account-section">
             <button 
               @click="showDeleteModal = true"
-              class="btn btn-danger"
+              class="btn-delete-account"
               :disabled="deleteLoading"
             >
               Deletar Conta
@@ -115,18 +106,7 @@
         
         <div class="modal-body">
           <p>Tem certeza que deseja deletar sua conta?</p>
-          <p><strong>Esta ação não pode ser desfeita.</strong></p>
-          
-          <div class="form-group">
-            <label for="delete-confirm">Digite "DELETAR" para confirmar:</label>
-            <input 
-              v-model="deleteConfirm"
-              type="text" 
-              id="delete-confirm"
-              placeholder="DELETAR"
-              :disabled="deleteLoading"
-            >
-          </div>
+          <p>Esta ação não pode ser desfeita e todos os seus dados serão permanentemente removidos.</p>
           
           <div v-if="deleteError" class="error-message">
             {{ deleteError }}
@@ -144,7 +124,7 @@
           <button 
             @click="deleteAccount"
             class="btn btn-danger"
-            :disabled="deleteLoading || deleteConfirm !== 'DELETAR'"
+            :disabled="deleteLoading"
           >
             <span v-if="deleteLoading">Deletando...</span>
             <span v-else>Deletar Conta</span>
@@ -172,7 +152,6 @@ const passwordError = ref('')
 const passwordSuccess = ref('')
 const deleteError = ref('')
 const showDeleteModal = ref(false)
-const deleteConfirm = ref('')
 
 // Formulário de senha
 const passwordForm = ref({
@@ -181,7 +160,6 @@ const passwordForm = ref({
   confirmPassword: ''
 })
 
-// Computed
 const user = computed(() => auth.user)
 const isPasswordFormValid = computed(() => {
   return passwordForm.value.currentPassword && 
@@ -239,7 +217,6 @@ async function deleteAccount() {
   try {
     await api.delete('/users')
     
-    // Logout após deletar conta
     auth.logout()
     router.push({ name: 'login' })
   } catch (error) {
@@ -263,44 +240,56 @@ onMounted(() => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 .profile-container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .profile-content {
   padding: 2rem 0;
 }
 
+
 .profile-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   overflow: hidden;
+  border: 1px solid #e5e7eb;
 }
 
 .profile-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #3b82f6;
   color: white;
-  padding: 2rem;
+  padding: 1.5rem;
   text-align: center;
 }
 
 .profile-header h2 {
   margin: 0 0 0.5rem 0;
-  font-size: 1.75rem;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.5rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .profile-header p {
   margin: 0;
   opacity: 0.9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .profile-section {
-  padding: 2rem;
-  border-bottom: 1px solid #e1e5e9;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .profile-section:last-child {
@@ -308,10 +297,13 @@ onMounted(() => {
 }
 
 .profile-section h3 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.25rem;
+  margin: 0 0 1rem 0;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.125rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #111827;
+  letter-spacing: -0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .user-info {
@@ -326,19 +318,25 @@ onMounted(() => {
 }
 
 .info-item label {
-  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
   color: #374151;
-  font-size: 0.875rem;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .info-item span {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   color: #6b7280;
-  font-size: 1rem;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .password-form {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .form-group {
@@ -348,23 +346,29 @@ onMounted(() => {
 }
 
 .form-group label {
-  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
   color: #374151;
-  font-size: 0.875rem;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .form-group input {
-  padding: 12px 16px;
-  border: 2px solid #e1e5e9;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .form-group input:disabled {
@@ -372,35 +376,54 @@ onMounted(() => {
   color: #9ca3af;
 }
 
-.danger-section {
-  background: #fef2f2;
-  border-left: 4px solid #dc2626;
-}
-
-.danger-content {
+.delete-account-section {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  justify-content: center;
+  padding: 1rem 0;
 }
 
-.warning-text {
-  color: #991b1b;
-  font-size: 0.875rem;
-  line-height: 1.5;
+.btn-delete-account {
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+.btn-delete-account:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.btn-delete-account:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn {
-  padding: 12px 24px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 6px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .btn:disabled {
@@ -409,23 +432,22 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #3b82f6;
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  background: #2563eb;
 }
 
 .btn-secondary {
-  background: #f8fafc;
+  background: #f9fafb;
   color: #374151;
-  border: 2px solid #e1e5e9;
+  border: 1px solid #d1d5db;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #e1e5e9;
+  background: #f3f4f6;
 }
 
 .btn-danger {
@@ -435,25 +457,30 @@ onMounted(() => {
 
 .btn-danger:hover:not(:disabled) {
   background: #b91c1c;
-  transform: translateY(-1px);
 }
 
 .error-message {
   background: #fef2f2;
   color: #dc2626;
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
   border: 1px solid #fecaca;
-  font-size: 0.875rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .success-message {
   background: #f0fdf4;
   color: #16a34a;
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
   border: 1px solid #bbf7d0;
-  font-size: 0.875rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 /* Modal */
@@ -472,8 +499,8 @@ onMounted(() => {
 
 .modal {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   max-width: 500px;
   width: 90%;
   max-height: 90vh;
@@ -481,30 +508,36 @@ onMounted(() => {
 }
 
 .modal-header {
-  padding: 1.5rem 1.5rem 0;
+  padding: 1rem 1rem 0;
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #dc2626;
-  font-size: 1.25rem;
+  color: #111827;
+  font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.125rem;
   font-weight: 600;
+  letter-spacing: -0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .modal-body {
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 .modal-body p {
   margin: 0 0 1rem 0;
   color: #374151;
   line-height: 1.5;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: 0.01em;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 .modal-footer {
-  padding: 0 1.5rem 1.5rem;
+  padding: 0 1rem 1rem;
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   justify-content: flex-end;
 }
 

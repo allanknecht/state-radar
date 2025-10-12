@@ -1,0 +1,21 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Casa estilizada -->
+  <g transform="translate(5, 5)">
+    <!-- Telhado -->
+    <path d="M15 3L25 13L5 13L15 3Z" fill="white"/>
+    <!-- Casa -->
+    <rect x="7" y="13" width="16" height="12" fill="white"/>
+    <!-- Porta -->
+    <rect x="13" y="19" width="4" height="6" fill="url(#gradient)"/>
+    <!-- Janelas -->
+    <rect x="9" y="15" width="3" height="3" fill="url(#gradient)"/>
+    <rect x="18" y="15" width="3" height="3" fill="url(#gradient)"/>
+  </g>
+  
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

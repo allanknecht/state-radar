@@ -1,6 +1,3 @@
-# app/services/solar_scraper_service.rb
-
-# Force remove all related constants to prevent superclass mismatch (dev/reload safety)
 %w[
   SolarScraperService
   SolarScraperServiceCardParser
@@ -29,9 +26,7 @@ class SolarScraperService < BaseScraperService
 end
 
 class SolarScraperServiceCardParser < BaseCardParser
-  # All common functionality is inherited
 end
 
 class SolarScraperServicePropertyDetailsExtractor < BasePropertyDetailsExtractor
-  # All common functionality is inherited
 end

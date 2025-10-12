@@ -41,6 +41,7 @@ class BaseScraperService
           begin
             details = property_details_extractor.extract(base[:link])
             base.merge!(details)
+            base[:site] = site_identifier
             polite_sleep
           rescue => e
             warn "[#{site_name}] detalhes falharam em #{base[:link]}: #{e.class} - #{e.message}"
@@ -63,7 +64,6 @@ class BaseScraperService
 
   protected
 
-  # Template methods to be overridden by subclasses
   def site_name
     self.class.name.gsub(/ScraperService$/, "")
   end
@@ -123,8 +123,22 @@ class BaseScraperService
 
   def parse_brl(text)
     return nil if text.nil? || text.empty?
+
+    if text.match?(/consulte/i)
+      return nil
+    end
+
+    if text.match?(/(\d+)x\s+de\s+R?\$?\s*([\d\.,]+)/i)
+      match = text.match(/(\d+)x\s+de\s+R?\$?\s*([\d\.,]+)/i)
+      installments = match[1]
+      price_part = match[2]
+      price_value = parse_decimal(price_part)
+      return { value: price_value, installments: installments }
+    end
+
     clean = text.gsub(/[^\d\.,]/, "").strip
-    parse_decimal(clean)
+    price_value = parse_decimal(clean)
+    price_value
   end
 
   def parse_decimal(num_str)

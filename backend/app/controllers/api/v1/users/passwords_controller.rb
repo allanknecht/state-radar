@@ -5,7 +5,6 @@ module Api
         respond_to :json
         before_action :authenticate_api_v1_user!
 
-        # PATCH /api/v1/users/password/change - Alterar senha do usuário logado
         def change_password
           current_user = User.find(current_api_v1_user.id)
 

@@ -37,7 +37,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
       - RAILS_ENV=development
       - DATABASE_URL=postgresql://postgres:password@db:5432/sistema_busca_imoveis_development
@@ -55,6 +55,7 @@ services:
       sh -c "
         bundle install &&
         rails db:create db:migrate db:seed &&
+        rm -f tmp/pids/server.pid &&
         bundle exec rails server -b 0.0.0.0 -p 3000
       "
     stdin_open: true
@@ -66,9 +67,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3001:3001"
     environment:
-      - VITE_API_BASE_URL=http://localhost:3001
+      - VITE_API_BASE_URL=http://localhost:3000
       - VITE_APP_TITLE=Sistema de Busca de Imóveis
     volumes:
       - ./frontend:/app

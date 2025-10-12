@@ -8,7 +8,6 @@ module Api
           user = User.find_by(email: params[:user][:email])
 
           if user && user.valid_password?(params[:user][:password])
-            # Usar o Devise JWT para gerar o token
             token = Warden::JWTAuth::UserEncoder.new.call(user, :api_v1_user, nil)
 
             render json: {
@@ -24,7 +23,6 @@ module Api
         end
 
         def destroy
-          # Para logout, apenas retornar sucesso
           head :no_content
         end
       end

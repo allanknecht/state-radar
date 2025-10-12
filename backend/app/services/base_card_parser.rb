@@ -38,7 +38,6 @@ class BaseCardParser
 
     return code if code
 
-    # Fallback for special code span
     code_span = @node.at_css(".product-badge .code_style, .product-badge span")
     code_text = squish(code_span&.text)
     code_text&.match(/(\d+)/)&.captures&.first
@@ -106,7 +105,6 @@ class BaseCardParser
       iptu: nil,
     }
 
-    # Try different list selectors
     list_selectors = [
       ".ltn__plot-brief li",
       "ul.ltn__list-item-2--- li",
@@ -170,7 +168,6 @@ class BaseCardParser
     text.to_s.match(/(\d+)/)&.[](1)&.to_i
   end
 
-  # Delegate to scraper
   def squish(str); @scraper.send(:squish, str); end
   def parse_brl(str); @scraper.send(:parse_brl, str); end
   def parse_decimal(str); @scraper.send(:parse_decimal, str); end
