@@ -138,6 +138,8 @@ const visiblePages = computed(() => {
 function goToPage(page) {
   if (page >= 1 && page <= props.totalPages && page !== props.currentPage) {
     emit('page-change', page)
+    // Scroll para o topo da página
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 </script>

@@ -27,7 +27,17 @@
           </button>
         </div>
         <div v-if="searchText" class="search-results-info">
-          {{ searchResultsCount }} resultado(s) para "{{ searchText }}"
+          <span v-if="searching" class="searching-indicator">
+            <svg class="searching-spinner" viewBox="0 0 24 24" width="16" height="16">
+              <path fill="currentColor" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z">
+                <animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" values="0 12 12;360 12 12"/>
+              </path>
+            </svg>
+            Buscando...
+          </span>
+          <span v-else>
+            {{ searchResultsCount }} resultado(s) para "{{ searchText }}"
+          </span>
         </div>
       </div>
 
@@ -58,18 +68,29 @@
     </div>
 
     <!-- Grid de Imóveis -->
-    <div v-if="filteredImoveis.length" class="imoveis-grid">
+    <div v-if="!loading && !error && filteredImoveis.length > 0" class="imoveis-grid" :class="{ 'searching': isSearching }">
       <ImovelCard 
         v-for="imovel in filteredImoveis" 
         :key="imovel.id" 
         :imovel="imovel"
         @openModal="openModal"
       />
+      <!-- Overlay de busca -->
+      <div v-if="isSearching" class="search-overlay">
+        <div class="search-overlay-content">
+          <svg class="search-overlay-spinner" viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z">
+              <animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" values="0 12 12;360 12 12"/>
+            </path>
+          </svg>
+          <span>Atualizando resultados...</span>
+        </div>
+      </div>
     </div>
 
     <!-- Paginação -->
     <PaginationComponent
-      v-if="filteredImoveis.length && totalPages > 1"
+      v-if="!loading && !error && filteredImoveis.length > 0 && totalPages > 1"
       :current-page="currentPage"
       :total-pages="totalPages"
       :total-count="totalCount"
@@ -77,7 +98,7 @@
     />
 
     <!-- Empty State -->
-    <div v-else-if="!loading && !error" class="empty-state">
+    <div v-else-if="!loading && !error && filteredImoveis.length === 0 && totalCount === 0" class="empty-state">
       <svg class="empty-icon" viewBox="0 0 24 24" width="64" height="64">
         <path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
       </svg>
@@ -108,6 +129,7 @@ const router = useRouter()
 const auth = useAuthStore()
 const imoveis = ref([])
 const loading = ref(false)
+const searching = ref(false)
 const error = ref('')
 const selectedImovel = ref(null)
 
@@ -131,6 +153,8 @@ const sortBy = ref('')
 
 // Busca por texto
 const searchText = ref('')
+const searchTimeout = ref(null)
+const isSearching = ref(false)
 
 // Agora a filtragem é feita no backend, então usamos imoveis diretamente
 const filteredImoveis = computed(() => imoveis.value)
@@ -143,21 +167,43 @@ function handleSearch() {
 function handlePageChange(page) {
   currentPage.value = page
   fetchImoveis()
+  // Scroll para o topo da página
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 // Funções de busca por texto
 function handleSearchText() {
+  // Limpar timeout anterior se existir
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value)
+  }
+  
+  // Mostrar indicador de busca
+  searching.value = true
+  isSearching.value = true
+  
+  // Aguardar 500ms após o usuário parar de digitar
+  searchTimeout.value = setTimeout(() => {
+    currentPage.value = 1
+    fetchImoveis()
+  }, 500)
+}
+
+function clearSearch() {
+  // Limpar timeout se existir
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value)
+  }
+  
+  searching.value = false
+  isSearching.value = false
+  searchText.value = ''
   currentPage.value = 1
   fetchImoveis()
 }
 
-function clearSearch() {
-  searchText.value = ''
-  handleSearchText()
-}
-
 const searchResultsCount = computed(() => {
-  if (!searchText.value) return imoveis.value.length
+  if (!searchText.value) return totalCount.value
   return filteredImoveis.value.length
 })
 
@@ -239,6 +285,7 @@ async function fetchImoveis() {
     
     console.log('Dados recebidos:', {
       imoveis: imoveis.value.length,
+      filteredImoveis: filteredImoveis.value.length,
       meta: data.meta,
       pagination: {
         currentPage: currentPage.value,
@@ -252,7 +299,8 @@ async function fetchImoveis() {
         minPrice: minPrice.value,
         maxPrice: maxPrice.value,
         minBedrooms: minBedrooms.value,
-        sort: sortBy.value
+        sort: sortBy.value,
+        search: searchText.value
       }
     })
     
@@ -268,6 +316,8 @@ async function fetchImoveis() {
     perPage.value = 20
   } finally {
     loading.value = false
+    searching.value = false
+    isSearching.value = false
   }
 }
 
@@ -293,7 +343,7 @@ onMounted(async () => {
     fetchCategories()
   ])
   // Depois carregar os imóveis
-  fetchImoveis()
+  await fetchImoveis()
 })
 </script>
 
@@ -363,6 +413,41 @@ onMounted(async () => {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  transition: opacity 0.3s ease;
+}
+
+.imoveis-grid.searching {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.search-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+
+.search-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: #3b82f6;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.search-overlay-spinner {
+  animation: spin 1s linear infinite;
 }
 
 /* Estados de Loading e Error */
@@ -511,6 +596,24 @@ onMounted(async () => {
   color: #6b7280;
   font-size: 14px;
   font-family: var(--font-primary);
+}
+
+.searching-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.searching-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @media (max-width: 768px) {

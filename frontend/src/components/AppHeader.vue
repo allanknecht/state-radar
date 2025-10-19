@@ -7,13 +7,23 @@
         </div>
       </a>
       <div class="header-actions">
-        <router-link 
-          v-if="$route.name !== 'perfil'" 
-          to="/perfil" 
-          class="btn btn-secondary"
-        >
-          Perfil
-        </router-link>
+      <router-link 
+        v-if="$route.name !== 'perfil'" 
+        to="/perfil" 
+        class="btn btn-secondary"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path 
+            d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" 
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          />
+          <path 
+            d="M4 22V20C4 17.7909 5.79086 16 8 16H16C18.2091 16 20 17.7909 20 20V22" 
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          />
+        </svg>
+        Perfil
+      </router-link>
         <router-link 
           v-else 
           to="/lista" 
