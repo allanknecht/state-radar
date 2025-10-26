@@ -8,7 +8,7 @@ Interface web desenvolvida em Vue.js para busca e visualização de imóveis col
 - **Vue Router** - Roteamento
 - **Pinia** - Gerenciamento de estado
 - **Axios** - Cliente HTTP
-- **Bootstrap 5** - Framework CSS
+- **CSS Customizado** - Sistema de design próprio
 
 ## 📋 Funcionalidades
 
@@ -49,12 +49,9 @@ npm run build
 
 # Preview da build
 npm run preview
-
-# Lint
-npm run lint
 ```
 
 ## 🌐 URLs de Acesso
 
-- **Desenvolvimento**: http://localhost:3000
+- **Desenvolvimento**: http://localhost:3001
 - **Produção**: https://seuapp.com

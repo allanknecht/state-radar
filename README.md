@@ -17,7 +17,7 @@ Sistema web que automatiza a coleta de dados de imóveis de múltiplas imobiliá
 - **Vue Router** - Roteamento
 - **Pinia** - Gerenciamento de estado
 - **Axios** - Cliente HTTP
-- **Bootstrap 5** - Framework CSS
+- **CSS Customizado** - Sistema de design próprio
 
 ### DevOps
 - **Docker** - Containerização
@@ -87,7 +87,6 @@ npm run dev
 
 # Executar testes
 npm run test:backend
-npm run test:frontend
 npm run test:all
 
 # Build para produção
@@ -97,8 +96,8 @@ npm run build
 ## 🌐 URLs de Acesso
 
 ### Desenvolvimento
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001
+- **Frontend**: http://localhost:3001
+- **Backend API**: http://localhost:3000
 
 ### Produção
 - **Frontend**: https://seuapp.com
