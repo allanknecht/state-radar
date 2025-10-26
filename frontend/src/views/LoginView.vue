@@ -2,7 +2,9 @@
   <div class="login-container">
     <div class="login-card">
       <div class="login-header">
-        <h1 class="login-title">Entrar</h1>
+        <div class="logo-section">
+          <img src="/logo-new.svg" alt="BuscaImóveis" class="logo">
+        </div>
         <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
       </div>
 
@@ -103,6 +105,28 @@ const submit = async () => {
 .login-header {
   text-align: center;
   margin-bottom: 2rem;
+}
+
+.logo-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  margin-left: 68px;
+
+}
+
+.logo {
+  height: 80px;
+  width: auto;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  opacity: 0.9;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  opacity: 1;
 }
 
 .login-title {
