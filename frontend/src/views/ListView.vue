@@ -74,6 +74,7 @@
         :key="imovel.id" 
         :imovel="imovel"
         @openModal="openModal"
+        @favorite-changed="handleFavoriteChanged"
       />
       <!-- Overlay de busca -->
       <div v-if="isSearching" class="search-overlay">
@@ -334,6 +335,14 @@ function openModal(imovel) {
 
 function closeModal() {
   selectedImovel.value = null
+}
+
+function handleFavoriteChanged({ id, is_favorited }) {
+  // Atualizar o estado do favorito no imóvel correspondente
+  const imovel = imoveis.value.find(i => i.id === id)
+  if (imovel) {
+    imovel.is_favorited = is_favorited
+  }
 }
 
 onMounted(async () => {

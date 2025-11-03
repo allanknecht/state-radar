@@ -14,6 +14,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_12_154257) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
+  create_table "favorites", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "scraper_record_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["scraper_record_id"], name: "index_favorites_on_scraper_record_id"
+    t.index ["user_id", "scraper_record_id"], name: "index_favorites_on_user_id_and_scraper_record_id", unique: true
+    t.index ["user_id"], name: "index_favorites_on_user_id"
+  end
+
   create_table "jwt_denylists", force: :cascade do |t|
     t.string "jti"
     t.datetime "exp"
@@ -69,4 +79,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_12_154257) do
     t.index ["jti"], name: "index_users_on_jti"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
+  add_foreign_key "favorites", "scraper_records", on_delete: :cascade
+  add_foreign_key "favorites", "users"
 end

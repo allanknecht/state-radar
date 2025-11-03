@@ -104,6 +104,13 @@ module Api
         attrs["iptu_formatado"] = record.iptu_formatado
         attrs["condominio_formatado"] = record.condominio_formatado
 
+        # Adiciona informação se está favoritado pelo usuário atual
+        if current_user
+          attrs["is_favorited"] = current_user.favorites.exists?(scraper_record_id: record.id)
+        else
+          attrs["is_favorited"] = false
+        end
+
         attrs
       end
     end

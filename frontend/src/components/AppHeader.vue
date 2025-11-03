@@ -7,25 +7,8 @@
         </div>
       </a>
       <div class="header-actions">
-      <router-link 
-        v-if="$route.name !== 'perfil'" 
-        to="/perfil" 
-        class="btn btn-secondary"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path 
-            d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" 
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          />
-          <path 
-            d="M4 22V20C4 17.7909 5.79086 16 8 16H16C18.2091 16 20 17.7909 20 20V22" 
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          />
-        </svg>
-        Perfil
-      </router-link>
         <router-link 
-          v-else 
+          v-if="$route.name !== 'lista'" 
           to="/lista" 
           class="btn btn-secondary"
         >
@@ -33,7 +16,34 @@
             <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Voltar ao Home
+          Home
+        </router-link>
+        <router-link 
+          v-if="$route.name !== 'favoritos'" 
+          to="/favoritos" 
+          class="btn btn-secondary"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
+          </svg>
+          Favoritos
+        </router-link>
+        <router-link 
+          v-if="$route.name !== 'perfil'" 
+          to="/perfil" 
+          class="btn btn-secondary"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path 
+              d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" 
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            />
+            <path 
+              d="M4 22V20C4 17.7909 5.79086 16 8 16H16C18.2091 16 20 17.7909 20 20V22" 
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            />
+          </svg>
+          Perfil
         </router-link>
         <button @click="$emit('logout')" class="btn btn-outline">Sair</button>
       </div>

@@ -30,10 +30,24 @@ class PropertyScraperJob < ApplicationJob
     end
 
     scraper = scraper_class.new
+    site_string = scraper_name.to_s
+
+    # Rastrear registros encontrados por categoria
+    found_records_by_category = {}
+
     %i[locacao venda].each do |categoria|
+      categoria_normalizada = normalize_categoria(categoria)
+      found_ids = []
+
       scraper.scrape_category(categoria, fetch_details: true) do |record|
-        upsert_record!(record, scraper_name)
+        db_record = upsert_record!(record, scraper_name)
+        found_ids << db_record.id if db_record
       end
+
+      found_records_by_category[categoria_normalizada] = found_ids
+
+      # Deletar registros que não foram encontrados para esta categoria e site
+      delete_unfound_records(site_string, categoria_normalizada, found_ids)
     end
   end
 
@@ -48,7 +62,7 @@ class PropertyScraperJob < ApplicationJob
     missing = validate_required_fields(record, code)
     if missing.any?
       warn "[#{scraper_name.upcase}Job] SKIP: missing #{missing.join(", ")} (link=#{record[:link].inspect})"
-      return
+      return nil
     end
 
     db_record = ScraperRecord.find_or_initialize_by(
@@ -64,8 +78,23 @@ class PropertyScraperJob < ApplicationJob
     db_record
   rescue ActiveRecord::RecordInvalid => e
     warn "[#{scraper_name.upcase}Job] VALIDATION FAIL site=#{record[:site]} code=#{code} -> #{e.record.errors.full_messages.join("; ")}"
+    nil
   rescue => e
     warn "[#{scraper_name.upcase}Job] UPSERT FAIL site=#{record[:site]} code=#{code} -> #{e.class}: #{e.message}"
+    nil
+  end
+
+  def delete_unfound_records(site, categoria, found_ids)
+    # Encontrar todos os registros do site e categoria que não foram encontrados nesta execução
+    unfound_records = ScraperRecord.where(site: site, categoria: categoria)
+                                   .where.not(id: found_ids)
+
+    if unfound_records.any?
+      count = unfound_records.count
+      # Deletar registros - os favoritos serão deletados automaticamente devido ao cascade
+      unfound_records.delete_all
+      warn "[#{site.upcase}Job] DELETED #{count} records not found in scraping (site=#{site}, categoria=#{categoria})"
+    end
   end
 
   def assign_record_attributes(db_record, record)

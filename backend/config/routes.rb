@@ -14,6 +14,8 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :favorites, only: %i[index create destroy]
+
       devise_for :users,
                  path: "users",
                  defaults: { format: :json },

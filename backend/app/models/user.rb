@@ -7,6 +7,9 @@ class User < ApplicationRecord
 
   before_create :ensure_jti
 
+  has_many :favorites, dependent: :destroy
+  has_many :favorite_scraper_records, through: :favorites, source: :scraper_record
+
   private
 
   def ensure_jti

@@ -7,6 +7,9 @@ class ScraperRecord < ApplicationRecord
                      uniqueness: { scope: [:site, :categoria] }
   validates :categoria, presence: true, inclusion: { in: CATEGORIES }
 
+  has_many :favorites, dependent: :destroy
+  has_many :users, through: :favorites
+
   def preco_formatado
     return "Preço indisponível" unless preco_brl.present?
     "R$ #{format_brl_currency(preco_brl)}"
