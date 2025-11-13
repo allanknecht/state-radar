@@ -1,61 +1,61 @@
-# Sistema de Busca de Imóveis
+# Real Estate Search System
 
-Sistema web que automatiza a coleta de dados de imóveis de múltiplas imobiliárias, centralizando as informações em uma única plataforma para facilitar a busca e comparação de propriedades.
+Web system that automates the collection of real estate data from multiple real estate agencies, centralizing information in a single platform to facilitate property search and comparison.
 
-## 🚀 Tecnologias Utilizadas
+## 🚀 Technologies Used
 
 ### Backend
-- **Ruby 3.x** - Linguagem de programação
-- **Ruby on Rails 8.0** - Framework web
-- **PostgreSQL** - Banco de dados
-- **Devise + JWT** - Autenticação
+- **Ruby 3.x** - Programming language
+- **Ruby on Rails 8.0** - Web framework
+- **PostgreSQL** - Database
+- **Devise + JWT** - Authentication
 - **Nokogiri** - Web scraping
 - **Sidekiq** - Background jobs
 
 ### Frontend
-- **Vue 3** - Framework JavaScript
-- **Vue Router** - Roteamento
-- **Pinia** - Gerenciamento de estado
-- **Axios** - Cliente HTTP
-- **CSS Customizado** - Sistema de design próprio
+- **Vue 3** - JavaScript framework
+- **Vue Router** - Routing
+- **Pinia** - State management
+- **Axios** - HTTP client
+- **Custom CSS** - Custom design system
 
 ### DevOps
-- **Docker** - Containerização
-- **Docker Compose** - Orquestração
+- **Docker** - Containerization
+- **Docker Compose** - Orchestration
 
-## 📋 Funcionalidades
+## 📋 Features
 
-- **API REST completa** - Endpoints para imóveis e autenticação
-- **Web scraping automatizado** - 3 imobiliárias integradas (Solar, Simão, MWS)
-- **Frontend Vue.js** - Interface moderna e responsiva
-- **Autenticação JWT** - Sistema seguro de login
-- **Sistema de filtros** - Busca avançada por múltiplos critérios
-- **Paginação** - Navegação eficiente pelos resultados
+- **Complete REST API** - Endpoints for properties and authentication
+- **Automated web scraping** - 3 integrated real estate agencies (Solar, Simão, MWS)
+- **Vue.js Frontend** - Modern and responsive interface
+- **JWT Authentication** - Secure login system
+- **Filter system** - Advanced search by multiple criteria
+- **Pagination** - Efficient navigation through results
 
-## 🚀 Como Rodar
+## 🚀 How to Run
 
-### Pré-requisitos
-- **Docker & Docker Compose** (Recomendado)
-- **Ruby 3.2+** e **Node.js 18+** (Desenvolvimento local)
+### Prerequisites
+- **Docker & Docker Compose** (Recommended)
+- **Ruby 3.2+** and **Node.js 18+** (Local development)
 
-### Usando Docker (Recomendado)
+### Using Docker (Recommended)
 ```bash
-# Clone o repositório
-git clone <seu-repositorio>
+# Clone the repository
+git clone <your-repository>
 cd sistema-busca-imoveis
 
-# Iniciar todos os serviços
+# Start all services
 docker-compose up --build
 
-# Executar migrações
+# Run migrations
 docker-compose exec backend rails db:migrate
 
-# Acessar a aplicação
+# Access the application
 # Frontend: http://localhost:3000
 # Backend API: http://localhost:3001
 ```
 
-### Desenvolvimento Local
+### Local Development
 ```bash
 # Backend
 cd backend
@@ -63,46 +63,46 @@ bundle install
 rails db:create db:migrate
 rails server -p 3001
 
-# Frontend (em outro terminal)
+# Frontend (in another terminal)
 cd frontend
 npm install
 npm run dev
 ```
 
-## 📚 Documentação
+## 📚 Documentation
 
-- **[API Documentation](backend/docs/API.md)** - Documentação completa da API
-- **[Architecture](backend/docs/ARCHITECTURE.md)** - Arquitetura do sistema
-- **[Installation Guide](backend/docs/INSTALLATION.md)** - Guia detalhado de instalação
-- **[Testing Guide](backend/docs/TESTING.md)** - Guia de testes
+- **[API Documentation](backend/docs/API.md)** - Complete API documentation
+- **[Architecture](backend/docs/ARCHITECTURE.md)** - System architecture
+- **[Installation Guide](backend/docs/INSTALLATION.md)** - Detailed installation guide
+- **[Testing Guide](backend/docs/TESTING.md)** - Testing guide
 
-## 🔧 Scripts de Desenvolvimento
+## 🔧 Development Scripts
 
 ```bash
-# Instalar dependências de ambos os projetos
+# Install dependencies for both projects
 npm run install:all
 
-# Executar em modo desenvolvimento
+# Run in development mode
 npm run dev
 
-# Executar testes
+# Run tests
 npm run test:backend
 npm run test:all
 
-# Build para produção
+# Build for production
 npm run build
 ```
 
-## 🌐 URLs de Acesso
+## 🌐 Access URLs
 
-### Desenvolvimento
+### Development
 - **Frontend**: http://localhost:3001
 - **Backend API**: http://localhost:3000
 
-### Produção
+### Production
 - **Frontend**: https://seuapp.com
 - **Backend API**: https://api.seuapp.com
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+This project is under the MIT license. See the [LICENSE](LICENSE) file for more details.
